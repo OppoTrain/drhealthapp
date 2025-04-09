@@ -1,9 +1,10 @@
+// app/login/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../lib/supabaseClient";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { supabase } from "../../lib/supabase/client";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,7 +19,6 @@ export default function LoginPage() {
   useEffect(() => {
     const savedEmail = localStorage.getItem("rememberedEmail");
     const savedPassword = localStorage.getItem("rememberedPassword");
-
     if (savedEmail && savedPassword) {
       setEmail(savedEmail);
       setPassword(savedPassword);
@@ -28,8 +28,7 @@ export default function LoginPage() {
 
   const validateEmail = (email: string): string => {
     if (!email) return "Email is required";
-    if (!email.includes("@"))
-      return "Please include an '@' in the email address";
+    if (!email.includes("@")) return "Invalid email address";
     return "";
   };
 
@@ -38,7 +37,8 @@ export default function LoginPage() {
     return "";
   };
 
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     setEmailError("");
     setPasswordError("");
     setGeneralError("");
@@ -46,16 +46,11 @@ export default function LoginPage() {
     const emailValidationError = validateEmail(email);
     const passwordValidationError = validatePassword(password);
 
-    if (emailValidationError) {
+    if (emailValidationError || passwordValidationError) {
       setEmailError(emailValidationError);
-      return;
-    }
-
-    if (passwordValidationError) {
       setPasswordError(passwordValidationError);
       return;
     }
-
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -72,6 +67,7 @@ export default function LoginPage() {
         localStorage.removeItem("rememberedPassword");
       }
       router.push("/dashboard");
+      console.log("redriecting");
     }
   };
 
@@ -126,34 +122,27 @@ export default function LoginPage() {
             </h2>
 
             {generalError && (
-              <div className="bg-red-50 text-red-700 text-sm p-4 rounded-lg border border-red-200 mb-6 flex items-center">
-                <span className="ml-1">{generalError}</span>
+              <div className="bg-red-50 text-red-700 text-sm p-4 rounded-lg border border-red-200 mb-6">
+                {generalError}
               </div>
             )}
 
-            <form
-              noValidate
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleLogin();
-              }}
-              className="space-y-6"
-            >
+            <form onSubmit={handleLogin} className="space-y-6" noValidate>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Email address
                 </label>
                 <input
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    emailError ? "border-red-300 bg-red-50" : "border-gray-300"
-                  } focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200`}
-                  placeholder="admin@drhealth.com"
                   type="email"
+                  placeholder="admin@drhealth.com"
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
                     if (emailError) setEmailError("");
                   }}
+                  className={`w-full px-4 py-3 rounded-lg border ${
+                    emailError ? "border-red-300 bg-red-50" : "border-gray-300"
+                  } focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200`}
                 />
                 {emailError && (
                   <p className="text-red-600 text-xs mt-1">{emailError}</p>
@@ -166,23 +155,23 @@ export default function LoginPage() {
                 </label>
                 <div className="relative">
                   <input
-                    className={`w-full px-4 py-3 rounded-lg border ${
-                      passwordError
-                        ? "border-red-300 bg-red-50"
-                        : "border-gray-300"
-                    } focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200`}
-                    placeholder="••••••••"
                     type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
                       if (passwordError) setPasswordError("");
                     }}
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      passwordError
+                        ? "border-red-300 bg-red-50"
+                        : "border-gray-300"
+                    } focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200`}
                   />
                   <button
                     type="button"
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                     onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                   >
                     {showPassword ? (
                       <EyeSlashIcon className="h-5 w-5" />
@@ -216,7 +205,7 @@ export default function LoginPage() {
 
               <button
                 type="submit"
-                className="w-full bg-emerald-600 text-white font-medium py-3 px-4 rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition duration-200 ease-in-out transform hover:-translate-y-1"
+                className="w-full bg-emerald-600 text-white font-medium py-3 px-4 rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition duration-200"
               >
                 Sign In
               </button>
