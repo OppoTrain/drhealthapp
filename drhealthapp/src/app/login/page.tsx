@@ -2,74 +2,64 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../lib/supabaseClient";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { createClient } from "@/lib/supabase/client";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
+const supabase = createClient();
+
+const schema = z.object({
+  email: z.string().email({ message: "Invalid email address" }),
+  password: z.string().min(1, { message: "Password is required" }),
+  rememberMe: z.boolean().optional(),
+});
+
+type FormData = z.infer<typeof schema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
   const [generalError, setGeneralError] = useState("");
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      email: "",
+      password: "",
+      rememberMe: false,
+    },
+  });
 
   useEffect(() => {
     const savedEmail = localStorage.getItem("rememberedEmail");
-    const savedPassword = localStorage.getItem("rememberedPassword");
-
-    if (savedEmail && savedPassword) {
-      setEmail(savedEmail);
-      setPassword(savedPassword);
-      setRememberMe(true);
+    if (savedEmail) {
+      setValue("email", savedEmail);
+      setValue("rememberMe", true);
     }
-  }, []);
+  }, [setValue]);
 
-  const validateEmail = (email: string): string => {
-    if (!email) return "Email is required";
-    if (!email.includes("@"))
-      return "Please include an '@' in the email address";
-    return "";
-  };
-
-  const validatePassword = (password: string): string => {
-    if (!password) return "Password is required";
-    return "";
-  };
-
-  const handleLogin = async () => {
-    setEmailError("");
-    setPasswordError("");
+  const onSubmit = async (data: FormData) => {
     setGeneralError("");
 
-    const emailValidationError = validateEmail(email);
-    const passwordValidationError = validatePassword(password);
-
-    if (emailValidationError) {
-      setEmailError(emailValidationError);
-      return;
-    }
-
-    if (passwordValidationError) {
-      setPasswordError(passwordValidationError);
-      return;
-    }
-
     const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+      email: data.email,
+      password: data.password,
     });
 
     if (error) {
       setGeneralError("Invalid login credentials");
     } else {
-      if (rememberMe) {
-        localStorage.setItem("rememberedEmail", email);
-        localStorage.setItem("rememberedPassword", password);
+      if (data.rememberMe) {
+        localStorage.setItem("rememberedEmail", data.email);
       } else {
         localStorage.removeItem("rememberedEmail");
-        localStorage.removeItem("rememberedPassword");
       }
       router.push("/dashboard");
     }
@@ -80,18 +70,6 @@ export default function LoginPage() {
       <div className="hidden md:flex md:w-1/2 bg-emerald-600 p-8 items-center justify-center">
         <div className="max-w-md text-white">
           <div className="flex items-center mb-8">
-            <svg
-              className="w-10 h-10 mr-3"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M2 22c1.25-1.25 2.5-2.5 3.5-4 .83-1.25 1.5-2.5 2-4 .5-1.5.5-3 0-4.5-.5-1.5-1.17-2.75-2-4C4.5 3.75 3.25 2.5 2 1h15a5 5 0 0 1 5 5v15a1 1 0 0 1-1 1h-4" />
-              <path d="M15.66 6.5a9 9 0 0 0-6.16 6.16" />
-            </svg>
             <h1 className="text-3xl font-bold">DrHealth</h1>
           </div>
           <h2 className="text-4xl font-bold mb-6">Nutrition Admin Portal</h2>
@@ -104,59 +82,40 @@ export default function LoginPage() {
 
       <div className="w-full md:w-1/2 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
-          <div className="md:hidden flex items-center justify-center mb-8">
-            <svg
-              className="w-8 h-8 text-emerald-600 mr-2"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M2 22c1.25-1.25 2.5-2.5 3.5-4 .83-1.25 1.5-2.5 2-4 .5-1.5.5-3 0-4.5-.5-1.5-1.17-2.75-2-4C4.5 3.75 3.25 2.5 2 1h15a5 5 0 0 1 5 5v15a1 1 0 0 1-1 1h-4" />
-              <path d="M15.66 6.5a9 9 0 0 0-6.16 6.16" />
-            </svg>
-            <h1 className="text-2xl font-bold text-emerald-800">DrHealth</h1>
-          </div>
-
           <div className="bg-white rounded-2xl shadow-xl p-8">
             <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">
               Admin Sign In
             </h2>
 
             {generalError && (
-              <div className="bg-red-50 text-red-700 text-sm p-4 rounded-lg border border-red-200 mb-6 flex items-center">
-                <span className="ml-1">{generalError}</span>
+              <div className="bg-red-50 text-red-700 text-sm p-4 rounded-lg border border-red-200 mb-6">
+                {generalError}
               </div>
             )}
 
             <form
-              noValidate
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleLogin();
-              }}
+              onSubmit={handleSubmit(onSubmit)}
               className="space-y-6"
+              noValidate
             >
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Email address
                 </label>
                 <input
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    emailError ? "border-red-300 bg-red-50" : "border-gray-300"
-                  } focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200`}
-                  placeholder="admin@drhealth.com"
                   type="email"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    if (emailError) setEmailError("");
-                  }}
+                  placeholder="admin@drhealth.com"
+                  {...register("email")}
+                  className={`w-full px-4 py-3 rounded-lg border ${
+                    errors.email
+                      ? "border-red-300 bg-red-50"
+                      : "border-gray-300"
+                  } focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200`}
                 />
-                {emailError && (
-                  <p className="text-red-600 text-xs mt-1">{emailError}</p>
+                {errors.email && (
+                  <p className="text-red-600 text-xs mt-1">
+                    {errors.email.message}
+                  </p>
                 )}
               </div>
 
@@ -166,23 +125,19 @@ export default function LoginPage() {
                 </label>
                 <div className="relative">
                   <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    {...register("password")}
                     className={`w-full px-4 py-3 rounded-lg border ${
-                      passwordError
+                      errors.password
                         ? "border-red-300 bg-red-50"
                         : "border-gray-300"
                     } focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200`}
-                    placeholder="••••••••"
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => {
-                      setPassword(e.target.value);
-                      if (passwordError) setPasswordError("");
-                    }}
                   />
                   <button
                     type="button"
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                     onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                   >
                     {showPassword ? (
                       <EyeSlashIcon className="h-5 w-5" />
@@ -191,8 +146,10 @@ export default function LoginPage() {
                     )}
                   </button>
                 </div>
-                {passwordError && (
-                  <p className="text-red-600 text-xs mt-1">{passwordError}</p>
+                {errors.password && (
+                  <p className="text-red-600 text-xs mt-1">
+                    {errors.password.message}
+                  </p>
                 )}
               </div>
 
@@ -200,8 +157,7 @@ export default function LoginPage() {
                 <label className="flex items-center text-sm text-gray-700">
                   <input
                     type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
+                    {...register("rememberMe")}
                     className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
                   />
                   <span className="ml-2">Remember me</span>
@@ -216,7 +172,7 @@ export default function LoginPage() {
 
               <button
                 type="submit"
-                className="w-full bg-emerald-600 text-white font-medium py-3 px-4 rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition duration-200 ease-in-out transform hover:-translate-y-1"
+                className="w-full bg-emerald-600 text-white font-medium py-3 px-4 rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition duration-200"
               >
                 Sign In
               </button>
