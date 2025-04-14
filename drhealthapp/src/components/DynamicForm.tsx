@@ -2,7 +2,7 @@ import React from 'react';
 import { useForm,SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import InputFactory from '../app/Components/InputFactory';
+import InputFactory from './InputFactory';
 
 // Map field types to Zod validation rules
 const getZodSchema = (fields) => {
