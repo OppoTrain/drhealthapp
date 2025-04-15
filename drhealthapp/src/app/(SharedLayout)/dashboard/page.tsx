@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import ClientCard from "@/components/ClientCard";
 import RegisterClientModal from "@/components/RegisterModal";
+import { useDisclosure } from "@heroui/modal";
 interface Patient {
   patient_id: string;
   patient_name: string;
@@ -22,9 +23,9 @@ export default function Dashboard() {
   const [sessionChecked, setSessionChecked] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [clients, setClients] = useState<Patient[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
   useEffect(() => {
     const checkSession = async () => {
@@ -52,7 +53,6 @@ export default function Dashboard() {
 
   const fetchClients = async (userId: string) => {
     try {
-      setIsLoading(true);
       const { data, error } = await supabase
         .from("patient")
         .select("*") // ✅ JUST SELECT FROM patient
@@ -71,7 +71,6 @@ export default function Dashboard() {
   };
 
   const handleClientAdded = async () => {
-    setIsModalOpen(false);
     if (userId) {
       await fetchClients(userId);
     }
@@ -133,7 +132,7 @@ export default function Dashboard() {
             </button>
           </div>
           <button
-            onClick={() => setIsModalOpen(true)}
+            onClick={onOpen}
             aria-label="add-client"
             className="bg-teal-600 text-white px-4 py-2 rounded flex items-center"
           >
@@ -163,12 +162,11 @@ export default function Dashboard() {
         )}
       </div>
 
-      {isModalOpen && (
-        <RegisterClientModal
-          onClose={() => setIsModalOpen(false)}
-          onClientAdded={handleClientAdded}
-        />
-      )}
+      <RegisterClientModal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        onClientAdded={handleClientAdded}
+      />
     </div>
   );
 }
