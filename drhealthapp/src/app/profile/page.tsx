@@ -6,12 +6,12 @@ import ProfileNavbar from './nav/navbar';
 
 export default function Profile() {
   return (
-    <div className="container-fluid ">
+    <div className="container-fluid flex flex-col">
       <div className='bg-ProfileBackGround h-[20vh]'>
         adsadsa
       </div>
       
-      <div className='flex justify-between p-5'>
+      <div className='flex justify-between p-3 w-[95vw] mx-auto '>
             <div className="flex items-center gap-4">
                 <div>
                 <Avatar size="lg" />
@@ -27,7 +27,10 @@ export default function Profile() {
         
             <div className="flex gap-2 mt-4 sm:mt-0">
 
-                <Button className='bg-buttonProfile rounded w-[260px] h-[50px] text-white'>View diet plan</Button>
+                <Button className="bg-buttonProfile text-white rounded-2xl w-[90%] sm:w-[300px] h-10 sm:h-12 text-sm sm:text-base">
+                    <img src='./Icons/list_alt.png' alt="Diet Icon" className="w-4 h-4 sm:w-5 sm:h-5"/>
+                    <span> View diet plan </span>
+                  </Button>
             </div>
       </div>
 
