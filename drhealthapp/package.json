@@ -9,12 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@heroui/modal": "^2.2.13",
+    "@heroui/react": "^2.7.5",
     "@heroui/system": "^2.4.12",
     "@heroui/theme": "^2.4.12",
-
-    "@heroicons/react": "^2.2.0",
-    "@heroui/react": "^2.7.5",
     "@hookform/resolvers": "^5.0.1",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.2",
@@ -40,5 +39,4 @@
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
   }
-
 }
