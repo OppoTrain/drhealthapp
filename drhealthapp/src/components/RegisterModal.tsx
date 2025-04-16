@@ -102,7 +102,7 @@ export default function RegisterModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg max-w-lg w-full mx-4">
+      <div className="bg-white rounded-lg w-[750px] mx-4">
         <div className="flex justify-between items-center p-4 border-b">
           <h2 className="text-xl font-medium text-center w-full">
             Register client
