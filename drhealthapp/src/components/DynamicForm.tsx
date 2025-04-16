@@ -12,6 +12,16 @@ const getZodSchema = (fields) => {
             field.minLength=1
         }
         switch (field.type) {
+
+            case 'number':
+            schema = z.coerce.number();
+            if (field.min !== undefined) {
+                schema = schema.min(field.min, `${field.label} must be at least ${field.min}`);
+            }
+            if (field.max !== undefined) {
+                schema = schema.max(field.max, `${field.label} must be at most ${field.max}`);
+            }
+            break;
             case 'text':
             case 'textarea':
                 schema = z.string();
