@@ -31,7 +31,7 @@ export default function ClientRootLayout({ children,params}) {
 
   
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
+    <div className="flex flex-col h-screen">
       {/* <nav className='bg-gray-100 flex justify-around	p-4'>
         
         <Link href={`/patient/${params.id}`}>Profile information</Link>
@@ -40,10 +40,10 @@ export default function ClientRootLayout({ children,params}) {
       </nav> */}
       
 
-      <div className="border-b border-gray-200 overflow-x-auto">
+      <div className="border-b border-gray-200 overflow-x-auto sticky top-0 bg-white z-10">
         <nav className="flex flex-wrap sm:flex-nowrap space-x-2 sm:space-x-8 min-w-max sm:min-w-0 px-8 justify-between">
         
-        <Link  className={getTabClasses(activeTab === 'profile')} href={`/patient/${params.id}`}>
+        <Link  className={getTabClasses(activeTab === 'profile')} href={`/patient/${params.id}/profile_info`}>
           <span className="flex items-center space-x-2">
             <img src="/Icons/account_circle.png" alt="profile Icon" className="w-5 h-5" />
             <span>Profile Info </span>
@@ -78,7 +78,7 @@ export default function ClientRootLayout({ children,params}) {
 
 
       </div>
-      <div className='p-4'>
+      <div className="flex-1 overflow-y-auto p-4">
         {children}
       </div>
 
