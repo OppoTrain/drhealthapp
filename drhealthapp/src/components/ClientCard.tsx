@@ -10,7 +10,6 @@ interface ClientProps {
     patient_name: string;
     gender: string;
     birth_date: string;
-    disases: string;
   };
   onDelete?: () => void;
 }
@@ -164,11 +163,6 @@ export default function ClientCard({ patient, onDelete }: ClientProps) {
             <p className="text-gray-500 text-sm">Age: {age}</p>
           </div>
         </div>
-        {patient.disases && (
-          <div className="text-sm text-gray-600">
-            <p>Diseases: {patient.disases}</p>
-          </div>
-        )}
       </div>
 
       {/* Confirmation Dialog that matches the image exactly */}

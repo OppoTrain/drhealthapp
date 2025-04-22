@@ -7,5 +7,12 @@ export default async function Home() {
     data: { session },
   } = await supabase.auth.getSession();
 
-  redirect(session ? "/dashboard" : "/login");
+
+  if (session) {
+    redirect("/dashboard");
+  } else {
+    redirect("/login");
+  }
+
+  return null;
 }

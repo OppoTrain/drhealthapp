@@ -12,6 +12,8 @@ const config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        buttonProfile: '#09868A',
+        ProfileBackGround:'#CCE0E1'
       },
     },
   },
