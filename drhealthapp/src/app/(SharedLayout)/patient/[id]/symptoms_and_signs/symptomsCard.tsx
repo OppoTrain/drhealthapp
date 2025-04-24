@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { RadioGroup, Radio } from "@heroui/react";
 import { CheckboxGroup, Checkbox } from "@heroui/react";
-import { SymptomCategory } from "@/app/profile/nav/SymptomsAndSigns/types";
+import { SymptomCategory } from "@/app/(SharedLayout)/patient/[id]/symptoms_and_signs/types";
 
 interface SymptomsCardProps {
   cardData: SymptomCategory;
@@ -30,7 +30,7 @@ export default function SymptomsCard({ cardData, setSelectedSymptoms }: Symptoms
   };
 
   return (
-    <div className="w-[280px] min-h-[220px] border-2 border-gray-300 shadow-md bg-white text-base p-5 rounded-[12px]">
+    <div className="w-5/6 min-h-60 max-h-fit border-1 border-gray-300 shadow-md bg-white text-base rounded-[12px] p-6">
       <h3 className="font-medium mb-3">{cardData.name}</h3>
       {cardData.type === "radio" ? (
         <RadioGroup value={selected} onValueChange={handleRadioChange}>
@@ -45,7 +45,6 @@ export default function SymptomsCard({ cardData, setSelectedSymptoms }: Symptoms
           ))}
         </RadioGroup>
       ) : (
-        <div className="flex flex-col space-y-2">
           <CheckboxGroup value={groupSelected} onChange={handleCheckboxChange}>
             {cardData.symptoms.map((symptom) => (
               <Checkbox
@@ -57,7 +56,6 @@ export default function SymptomsCard({ cardData, setSelectedSymptoms }: Symptoms
               </Checkbox>
             ))}
           </CheckboxGroup>
-        </div>
       )}
     </div>
   );
