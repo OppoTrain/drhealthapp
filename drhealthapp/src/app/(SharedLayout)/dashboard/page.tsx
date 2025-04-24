@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import ClientCard from "@/components/ClientCard";
 import RegisterClientModal from "@/components/RegisterModal";
 import { useDisclosure } from "@heroui/modal";
+
 interface Patient {
   patient_id: string;
   patient_name: string;
@@ -18,14 +19,15 @@ interface Patient {
 
 export default function Dashboard() {
   const supabase = createClient();
-
   const router = useRouter();
+
   const [sessionChecked, setSessionChecked] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [clients, setClients] = useState<Patient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const { isOpen, onOpen, onOpenChange } = useDisclosure()
+
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   useEffect(() => {
     const checkSession = async () => {
@@ -55,7 +57,7 @@ export default function Dashboard() {
     try {
       const { data, error } = await supabase
         .from("patient")
-        .select("*") // ✅ JUST SELECT FROM patient
+        .select("*")
         .eq("doctor_id", userId)
         .order("created_at", { ascending: false });
 
@@ -71,6 +73,8 @@ export default function Dashboard() {
   };
 
   const handleClientAdded = async () => {
+    onOpenChange(); // ✅ Correct usage with no arguments
+
     if (userId) {
       await fetchClients(userId);
     }
@@ -156,21 +160,19 @@ export default function Dashboard() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredClients.map((client) => (
-              <ClientCard
-                key={client.patient_id}
-                patient={client}
-                onDelete={() => fetchClients(userId!)}
-              />
+              <ClientCard key={client.patient_id} patient={client} />
             ))}
           </div>
         )}
       </div>
 
-      <RegisterClientModal
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-        onClientAdded={handleClientAdded}
-      />
+      {/* Modal: open only when isOpen is true */}
+      {isOpen && (
+        <RegisterClientModal
+          onClose={onOpenChange} // ✅ FIXED
+          onClientAdded={handleClientAdded}
+        />
+      )}
     </div>
   );
 }
