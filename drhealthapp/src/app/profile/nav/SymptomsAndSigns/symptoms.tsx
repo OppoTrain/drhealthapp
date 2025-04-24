@@ -58,11 +58,12 @@ export default function SymptomsAndSigns() {
   };
 
   return (
-    <form onSubmit={handleSave}>
-      <div className=" grid gap-y-6
-                       lg:w-[1332px] lg:grid-cols-4 lg:mx-auto lg:py-6 
-                       md:w-[700px] md:grid-cols-2  md:mx-auto md:py-4
-                       sm:w-[300px] sm:grid-cols-1 sm:mx-auto ">
+    <form onSubmit={handleSave} className="min-h-screen overflow-hidden">
+      <div className="grid gap-y-6 mx-auto
+                      sm:w-[300px] sm:grid-cols-1 
+                      md:w-[700px] md:grid-cols-2 md:py-4
+                      lg:w-[1332px] lg:grid-cols-4 lg:py-6">
+
         {data.map((category) => (
           <Card
             key={category.id}
@@ -71,8 +72,8 @@ export default function SymptomsAndSigns() {
           />
         ))}
       </div>
-      <div className="flex justify-end gap-[48px] px-[24px]">
-        <button type="button" className="w-[260px] h-[50px] border border-[#09868A] rounded-[12px]">
+      <div className="flex  lg:justify-end  md:justify-center  sm:justify-center gap-[48px] px-[24px] py-[50px]">
+        <button type="button" className="w-[260px] h-[50px] border border-[#09868A] rounded-[12px] ">
           Cancel
         </button>
         <button type="submit" className="w-[260px] h-[50px] bg-[#09868A] rounded-[12px]">Save</button>

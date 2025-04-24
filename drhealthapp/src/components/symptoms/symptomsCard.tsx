@@ -30,7 +30,7 @@ export default function SymptomsCard({ cardData, setSelectedSymptoms }: Symptoms
   };
 
   return (
-    <div className="w-[280px] min-h-[220px] border-2 border-gray-300 shadow-md bg-white text-base p-5">
+    <div className="w-[280px] min-h-[220px] border-2 border-gray-300 shadow-md bg-white text-base p-5 rounded-[12px]">
       <h3 className="font-medium mb-3">{cardData.name}</h3>
       {cardData.type === "radio" ? (
         <RadioGroup value={selected} onValueChange={handleRadioChange}>
