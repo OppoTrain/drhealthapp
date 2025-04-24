@@ -12,6 +12,16 @@ const getZodSchema = (fields) => {
             field.minLength=1
         }
         switch (field.type) {
+
+            case 'number':
+            schema = z.coerce.number();
+            if (field.min !== undefined) {
+                schema = schema.min(field.min, `${field.label} must be at least ${field.min}`);
+            }
+            if (field.max !== undefined) {
+                schema = schema.max(field.max, `${field.label} must be at most ${field.max}`);
+            }
+            break;
             case 'text':
             case 'textarea':
                 schema = z.string();
@@ -25,8 +35,23 @@ const getZodSchema = (fields) => {
             case 'email':
                 schema = z.string().email(`Invalid ${field.label.toLowerCase()} format`);
                 break;
+            case 'time':
+                schema = z.string()
+                    .regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, {
+                    message: `${field.label} must be in HH:MM format`,
+                    });
+                break;
+            
             case 'password':
                 schema = z.string().min(8, `${field.label} must be at least 8 characters`)
+                break;
+            case 'tel':
+                schema = z.string()
+                    .min(10, `${field.label} must be at least 10 digits`)
+                    .max(15, `${field.label} must be at most 15 digits`)
+                    .regex(/^[0-9+() -]*$/, {
+                        message: `${field.label} must contain only numbers and phone symbols (+, -, (, ))`
+                    });
                 break;
             case 'select':
             case 'radio':
