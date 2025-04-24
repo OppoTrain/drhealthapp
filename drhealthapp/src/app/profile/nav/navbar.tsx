@@ -8,7 +8,7 @@ import {MedicalReports} from './MedicalReports/medicalReports'
 import{MedicalInformation} from './MedicalInformation/medicalInformation'
 import {DietartyHabits} from './DietaryHabits/dietartyHabits'
 import {Conclusion} from './Conclusion/conclusion'
-import SymptomsAndSigns from './SymptomsAndSigns/symptoms'
+import {SymptomsAndSigns} from './SymptomsAndSigns/symptoms'
 
 const getTabClasses = (isActive: boolean): string => 
     `py-4 px-1 border-b-2 font-medium text-sm ${
