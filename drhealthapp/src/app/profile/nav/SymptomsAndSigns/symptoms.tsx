@@ -71,11 +71,11 @@ export default function SymptomsAndSigns() {
           />
         ))}
       </div>
-      <div className="flex justify-end">
-        <button type="button" className="mr-4">
+      <div className="flex justify-end gap-[48px] px-[24px]">
+        <button type="button" className="w-[260px] h-[50px] border border-[#09868A] rounded-[12px]">
           Cancel
         </button>
-        <button type="submit">Save</button>
+        <button type="submit" className="w-[260px] h-[50px] bg-[#09868A] rounded-[12px]">Save</button>
       </div>
     </form>
   );
