@@ -197,7 +197,7 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
                 alert('Failed to save profile');
             }
         },
-        onCancel: () => router.push('/patients')
+        onCancel: () => router.push('/dashboard')
     };
 
     if (loading) return <div>Loading...</div>;

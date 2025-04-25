@@ -1,17 +1,15 @@
 "use client";
-import { createClient } from "../../../../lib/supabase/client";
-import Card from "../../../../components/symptoms/symptomsCard";
+import { createClient } from "@/lib/supabase/client";
+import Card from "./symptomsCard";
 import { useEffect, useState } from "react";
-import { Button } from "@heroui/react"; 
-import { SymptomCategory,Symptom } from "./types";
-import { object } from "zod";
+import { SymptomCategory } from "./types";
 
 
-export default function SymptomsAndSigns() {
+export default function SymptomsAndSigns({ params }: { params: { id: string } }) {
   const [data, setData] = useState<SymptomCategory[]>([]);
   const [selectedSymptoms, setSelectedSymptoms] = useState<Record<number, number | string[]>>({});
   const supabase = createClient();
-  console.log(selectedSymptoms)
+
   useEffect(() => {
     const getData = async () => {
       const { data, error } = await supabase
@@ -37,17 +35,17 @@ export default function SymptomsAndSigns() {
     const payload=Object.values(selectedSymptoms).flatMap(value=> {
         if (Array.isArray(value)) {
           return value.map((id) => ({
-            patient_id: "10e7bfd4-d8b0-49ca-8d3f-a6e98befb8f8",
+            patient_id: params.id,
             symptom_id: Number(id),
           }));
         } else {
           return [{
-            patient_id: "10e7bfd4-d8b0-49ca-8d3f-a6e98befb8f8",
+            patient_id: params.id,
             symptom_id: Number(value),
           }];
       }})
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("patient_symptoms")
       .insert(payload);
     if (error) {
@@ -58,11 +56,13 @@ export default function SymptomsAndSigns() {
   };
 
   return (
-    <form onSubmit={handleSave} className="min-h-screen overflow-hidden">
-      <div className="grid gap-y-6 mx-auto
-                      sm:w-[300px] sm:grid-cols-1 
-                      md:w-[700px] md:grid-cols-2 md:py-4
-                      lg:w-[1332px] lg:grid-cols-4 lg:py-6">
+    <form onSubmit={handleSave} className="w-5/6 mx-auto py-12" >
+      <div className="grid gap-y-6
+                      content-center 
+                      justify-items-center
+                      sm:grid-cols-1 
+                      md:grid-cols-2 
+                      lg:grid-cols-4">
 
         {data.map((category) => (
           <Card
