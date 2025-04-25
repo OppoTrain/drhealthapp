@@ -14,14 +14,14 @@ const getZodSchema = (fields) => {
         switch (field.type) {
 
             case 'number':
-            schema = z.coerce.number();
-            if (field.min !== undefined) {
+                schema = z.coerce.number();
+                if (field.min !== undefined) {
                 schema = schema.min(field.min, `${field.label} must be at least ${field.min}`);
-            }
-            if (field.max !== undefined) {
+                }
+                if (field.max !== undefined) {
                 schema = schema.max(field.max, `${field.label} must be at most ${field.max}`);
-            }
-            break;
+                }
+                break;
             case 'text':
             case 'textarea':
                 schema = z.string();
@@ -32,15 +32,13 @@ const getZodSchema = (fields) => {
                     schema = schema.max(field.maxLength, `${field.label} must be at most ${field.maxLength} characters`);
                 }
                 break;
+            case 'date':
+                schema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)');
+                break;
             case 'email':
                 schema = z.string().email(`Invalid ${field.label.toLowerCase()} format`);
                 break;
-            case 'time':
-                schema = z.string()
-                    .regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, {
-                    message: `${field.label} must be in HH:MM format`,
-                    });
-                break;
+            
             
             case 'password':
                 schema = z.string().min(8, `${field.label} must be at least 8 characters`)
@@ -53,12 +51,25 @@ const getZodSchema = (fields) => {
                         message: `${field.label} must contain only numbers and phone symbols (+, -, (, ))`
                     });
                 break;
-            case 'select':
-            case 'radio':
-                const values = field.options.map(option => option.value);
-                schema = z.enum(values, {
-                    errorMap: () => ({ message: `Please select a valid option for ${field.label}` })
+            case 'textGender':
+                schema = z.string()
+                .refine(value => ['Male', 'Female'].includes(value), {
+                message: 'Gender must be either "Male" or "Female"'
                 });
+                break;
+
+            case 'textMaritalState':
+                schema = z.string()
+                .refine(value => ['Married', 'Single' , 'Armal'].includes(value), {
+                message: 'Must be either "Married" or "Single" or "Armal"'
+                });
+                break;
+            case 'radio':
+                if (field.name === 'pregnancy_status') {
+                    schema = z.enum(['true', 'false'], {
+                      errorMap: () => ({ message: `Please select pregnancy status` })
+                    });
+                }
                 break;
             case 'checkbox':
                 schema = z.boolean();
