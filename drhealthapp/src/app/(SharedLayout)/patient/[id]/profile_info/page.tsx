@@ -65,7 +65,7 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
                         } : {})
                       });
 
-                      console.log('type of data..',typeof(data.patient_profile[0].sleep_hours));
+                      console.log('data....',data);
 
                       console.log('is equal two : ' , data.gender==="Male");
                       console.log('is equal one notation : ' , data.gender==='Male');
@@ -203,14 +203,15 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
           try {
             // Format values before submission
             const formattedValues = {
-              ...values,
+              national_id: values.national_id,
+              first_visit: values.first_visit || null,
+              marital_status: values.marital_status,
+              bedtime: values.bedtime || null,
               sleep_hours: values.sleep_hours ? Number(values.sleep_hours) : null,
               children_number: values.children_number ? Number(values.children_number) : null,
-              previous_births: values.previous_births ? Number(values.previous_births) : null,
-              pregnancy_weeks: values.pregnancy_weeks ? Number(values.pregnancy_weeks) : null,
-              pregnance_status: Boolean(values.pregnancy_status),
-              first_visit: values.first_visit || null,
-              bedtime: values.bedtime || null
+              previos_births: values.previous_births ? Number(values.previous_births) : null,
+              pregnance_status: values.pregnance_status === "true",
+              pregnancy_weeks: values.pregnancy_weeks ? Number(values.pregnancy_weeks) : null
             };
       
             // Update patient basic info
@@ -229,21 +230,21 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
             // Handle patient profile (upsert)
             const { error: profileError } = await supabase
               .from('patient_profile')
-              .upsert({
+              .update({
                 patient_id: params.id,
                 ...formattedValues
-              });
+              }).eq('patient_id', params.id);
       
             if (profileError) throw profileError;
       
             alert('Patient data saved successfully!');
-            router.push('/patients');
+
           } catch (err) {
             console.error('Error saving patient data:', err);
             alert('Failed to save patient data');
           }
         },
-        onCancel: () => router.push('/patients')
+        onCancel: () => router.push('/dashboard')
       };
 
     if (loading) return <div>Loading...</div>;
