@@ -4,13 +4,11 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import DynamicForm from "@/components/DynamicForm";
-import { pattern } from "framer-motion/client";
 
 
 
 export default function PatientProfileForm({ params }: { params: { id: string } }) {
     const [loading, setLoading] = useState(true);
-    const [initialValuesProfileInfo, setInitialValuesProfileInfo] = useState({});
     const [initialValues, setInitialValues] = useState({});
     const [areas, setAreas] = useState([]);
     const supabase = createClient();
@@ -40,8 +38,8 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
                 `)
                 .eq('patient_id', params.id)
                 .single();
-                    console.log('Fetched patient data:', data);
-                    console.log('id' , params.id);
+                     console.log('Fetched patient data.......:', data);
+                    // console.log('id' , params.id);
                     if (errorOne) {
                         console.error('Error fetching patient:', errorOne);
                         return;
@@ -52,7 +50,7 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
                         gender: data.gender || '',
                         phone_number: data.phone_number || '',
                         birth_date: data.birth_date || '',
-                        ...(data.patient_profile? {
+                        ...(data.patient_profile && data.patient_profile.length > 0 ?{
                           national_id: data.patient_profile[0].national_id || '',
                           first_visit: data.patient_profile[0].first_visit || '',
                           marital_status: data.patient_profile[0].marital_status || '',
@@ -60,18 +58,12 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
                           sleep_hours: data.patient_profile[0].sleep_hours || '',
                           children_number: data.patient_profile[0].children_number || '',
                           previos_births: data.patient_profile[0].previos_births || '',
-                          pregnance_status: data.patient_profile[0].pregnance_status || '',
+                          pregnance_status: data.patient_profile[0].pregnance_status || false,
                           pregnancy_weeks: data.patient_profile[0].pregnancy_weeks || ''
                         } : {})
                       });
 
-                      console.log('data....',data);
-
-                      console.log('is equal two : ' , data.gender==="Male");
-                      console.log('is equal one notation : ' , data.gender==='Male');
-
-
-
+                      // console.log('data....',data);
                       // console.log('Gender values:', {
                       //   fromDB: data.gender,  // Should be 'Male'/'Female'/'Other'
                       //   options: ['Male', 'Female', 'Other'], // Should match exactly
@@ -177,7 +169,7 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
             initialValue: initialValues?.previos_births || 0
           },
           {
-            name: 'pregnancy_status',
+            name: 'pregnance_status',
             label: 'Are you pregnant?',
             type: 'radio',
             options: [
@@ -213,31 +205,58 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
               pregnance_status: values.pregnance_status === "true",
               pregnancy_weeks: values.pregnancy_weeks ? Number(values.pregnancy_weeks) : null
             };
-      
+
             // Update patient basic info
             const { error: patientError } = await supabase
-              .from('patient')
-              .update({
-                patient_name: values.patient_name,
-                phone_number: values.phone_number,
-                birth_date: values.birth_date,
-                gender: values.gender
-              })
-              .eq('patient_id', params.id);
-      
-            if (patientError) throw patientError;
-      
-            // Handle patient profile (upsert)
-            const { error: profileError } = await supabase
-              .from('patient_profile')
-              .update({
-                patient_id: params.id,
-                ...formattedValues
-              }).eq('patient_id', params.id);
-      
-            if (profileError) throw profileError;
-      
-            alert('Patient data saved successfully!');
+            .from('patient')
+            .update({
+              patient_name: values.patient_name,
+              phone_number: values.phone_number,
+              birth_date: values.birth_date,
+              gender: values.gender
+            })
+            .eq('patient_id', params.id);
+    
+          if (patientError) throw patientError;
+
+              // First check if any profile exists for this patient
+            const { data: existingProfiles, error: fetchError } = await supabase
+            .from('patient_profile')
+            .select('id')
+            .eq('patient_id', params.id);
+
+            if (fetchError) throw fetchError;
+
+
+            if (existingProfiles && existingProfiles.length > 0) {
+              // Update all matching profiles (though there should ideally be just one)
+              const { error: updateError } = await supabase
+                .from('patient_profile')
+                .update(formattedValues)
+                .eq('patient_id', params.id);
+          
+              if (updateError) throw updateError;
+            }
+
+            else {
+              // Insert new profile
+              const { error: insertError } = await supabase
+                .from('patient_profile')
+                .insert({
+                  patient_id: params.id,
+                  ...formattedValues
+                });
+
+              if (insertError) throw insertError;
+            }
+
+
+
+            alert('Patient profile saved successfully!');
+
+
+
+            
 
           } catch (err) {
             console.error('Error saving patient data:', err);
@@ -249,5 +268,5 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
 
     if (loading) return <div>Loading...</div>;
 
-    return <DynamicForm formConfig={{ ...formConfig, initialValuesProfileInfo }} />;
+    return <DynamicForm formConfig={{ ...formConfig, initialValues }} />;
 }

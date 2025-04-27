@@ -24,7 +24,7 @@ export default function Page({ params }: { params: { id: string } }) {
                     console.error('Error fetching body measurements:', error);
                     return;
                 }
-                console.log('Fetched body measurements:', data);
+                // console.log('Fetched body measurements:', data);
                 setInitialValues({
                     weight: data?.weight || '',
                     height: data?.height || '',

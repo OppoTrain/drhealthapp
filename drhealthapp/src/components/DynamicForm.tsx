@@ -65,7 +65,7 @@ const getZodSchema = (fields) => {
                 });
                 break;
             case 'radio':
-                if (field.name === 'pregnancy_status') {
+                if (field.name === 'pregnance_status') {
                     schema = z.enum(['true', 'false'], {
                       errorMap: () => ({ message: `Please select pregnancy status` })
                     });
