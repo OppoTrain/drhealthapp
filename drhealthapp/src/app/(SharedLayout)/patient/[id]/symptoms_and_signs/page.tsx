@@ -29,9 +29,16 @@ export default function SymptomsAndSigns({ params }: { params: { id: string } })
   }, []);
 
   
+  const deleteExcisted =async()=>{
+    const {data,error} = await supabase
+      .from("patient_symptoms")
+      .delete()
+      .eq("patient_id", params.id);
+  }
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    deleteExcisted()
     const payload=Object.values(selectedSymptoms).flatMap(value=> {
         if (Array.isArray(value)) {
           return value.map((id) => ({
@@ -68,12 +75,15 @@ export default function SymptomsAndSigns({ params }: { params: { id: string } })
           <Card
             key={category.id}
             cardData={category}
+            selectedSymptoms={selectedSymptoms}
             setSelectedSymptoms={setSelectedSymptoms}
           />
         ))}
       </div>
       <div className="flex  lg:justify-end  md:justify-center  sm:justify-center gap-[48px] px-[24px] py-[50px]">
-        <button type="button" className="w-[260px] h-[50px] border border-[#09868A] rounded-[12px] ">
+        <button type="button" 
+                className="w-[260px] h-[50px] border border-[#09868A] rounded-[12px] "
+                onClick={() => setSelectedSymptoms({})}>
           Cancel
         </button>
         <button type="submit" className="w-[260px] h-[50px] bg-[#09868A] rounded-[12px]">Save</button>
