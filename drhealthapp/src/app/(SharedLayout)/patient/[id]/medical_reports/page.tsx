@@ -2,8 +2,8 @@
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import FileTemplaet from "./fileTemplate";
-import { type FileObject } from "@supabase/storage-js"; // ✅ import this
-import {Checkbox } from "@heroui/react";
+import Image from "next/image";
+import { sup } from "framer-motion/client";
 
 interface InsertedFile {
   id: string;
@@ -17,8 +17,27 @@ interface InsertedFile {
 function Page({ params }: { params: { id: string } }) {
     const [uploading, setUploading] = useState(false);
     const supabase= createClient()
-    const [files, setFiles] = useState<FileObject[]>([]);
     const [schemaData, setSchemaData] = useState<InsertedFile[]>([]);
+    const [query, setQuery] = useState('');
+    const [results, setResults] = useState<InsertedFile[]>([]);
+
+    const handleDelete = (id: string) => {
+      setSchemaData((prev) => prev.filter((file) => file.id !== id));
+      setResults((prev) => prev.filter((file) => file.id !== id));
+      const deleteFile = async () => {
+        const { error } = await supabase
+          .from("Files")
+          .delete()
+          .eq("id", id);
+        if (error) {
+          console.error("Error deleting file:", error.message);
+        } else {
+          console.log("File deleted successfully");
+        }
+      }
+      deleteFile();
+    };
+    
 
     useEffect(() => {
       const getSchemaData = async () => {
@@ -41,7 +60,7 @@ function Page({ params }: { params: { id: string } }) {
     const uploadFile = async (file: File) => {
         setUploading(true);
         const fileBath=`${params.id}/${file.name}`
-        const { data, error } = await supabase
+        const { } = await supabase
           .storage
           .from("files")
           .upload(fileBath, file);
@@ -62,38 +81,75 @@ function Page({ params }: { params: { id: string } }) {
         setUploading(false);
       };
 
-    function dropHandler(ev:any) {
-        //console.log("File(s) dropped");
-        const supabase= createClient()
+    function dropHandler(ev: React.DragEvent<HTMLDivElement>) {
         ev.preventDefault();
         if (ev.dataTransfer.items) {
-          [...ev.dataTransfer.items].forEach((item, i) => {
+          Array.from(ev.dataTransfer.items).forEach((item, i) => {
             if (item.kind === "file") {
               const file = item.getAsFile();
-              console.log(`… file[${i}].name = ${file.name}`);
-              uploadFile(file);
+              if (file) {
+                console.log(`… file[${i}].name = ${file.name}`);
+                uploadFile(file);
+              }
             }
           });
         } else {
           // Use DataTransfer interface to access the file(s)
-          [...ev.dataTransfer.files].forEach((file, i) => {
+          Array.from(ev.dataTransfer.files).forEach((file, i) => {
             console.log(`… file[${i}].name = ${file.name}`);
           });
         }
       }
 
-      function dragOverHandler(ev:any) {
+      function dragOverHandler(ev: React.DragEvent<HTMLDivElement>) {
         console.log("File(s) in drop zone");
       
         // Prevent default behavior (Prevent file from being opened)
         ev.preventDefault();
       }
-      
-    
-      useEffect(() => {
-        console.log("Updated files:", files);
-      }, [files]);
 
+      useEffect(() => {
+        const delayDebounce = setTimeout(() => {
+          if (query.trim() === '') {
+            setResults([]);
+            return;
+          }
+    
+          const fetchResults = async () => {
+            const { data, error } = await supabase
+              .from('Files') // change to your table name
+              .select('*')
+              .ilike('file_name', `%${query}%`); // 'name' column
+    
+            if (!error) setResults(data);
+          };
+
+          console.log(results)
+          fetchResults();
+        }, 300); // debounce time
+    
+        return () => clearTimeout(delayDebounce);
+      }, [query]);
+
+      function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+        const files = event.target.files;
+        if (files && files.length > 0) {
+          const file = files[0];
+          console.log(`Selected file: ${file.name}`);
+          uploadFile(file);
+        }
+        supabase
+          .storage
+          .from("files")
+          .upload(`${params.id}/${files}`, files)
+          .then(({ data, error }) => {
+            if (error) {
+              console.error("Error uploading file:", error.message);
+            } else {
+              console.log("File uploaded successfully:", data);
+            }
+          });
+      }
     return (
         <div className="w-full">
             <div className="w-[30%]
@@ -113,68 +169,89 @@ function Page({ params }: { params: { id: string } }) {
                             onDrop={dropHandler}
                             onDragOver={dragOverHandler}>
 
-                <img src="/Icons/note_stack_add.png" 
+                <Image 
+                    src="/Icons/note_stack_add.png" 
                     alt="file upload icon" 
-                    className="w-[56px] 
-                                h-[56px]"/>
+                    width={56} 
+                    height={56} 
+                    className="w-[56px] h-[56px]" 
+                />
 
-                <button className="flex 
-                                ld:w-2/4
-                                md:w-3/4
-                                sm:4/4
-                                h-[50px] 
-                                gap-2 
-                                bg-[#09868A] 
-                                justify-center 
-                                items-center
-                                rounded-[12px]">
+                <label
+                  htmlFor="file-upload"
+                  className="flex 
+                            ld:w-2/4
+                            md:w-3/4
+                            sm:w-full
+                            h-[50px] 
+                            gap-2 
+                            bg-[#09868A] 
+                            justify-center 
+                            items-center
+                            rounded-[12px]
+                            cursor-pointer"
+                >
+                  <Image
+                    src="/Icons/upload.png"
+                    alt="upload icon"
+                    width={25}
+                    height={25}
+                    className="w-[25px] h-[25px]"
+                  />
+                  <h3 className="text-white">Upload file</h3>
+                </label>
 
-                    <img src="/Icons/upload.png" 
-                        alt="upload icon" 
-                        className="w-[25px] 
-                                    h-[25px]" />
-
-                    <h3 className="text-white ">Upload file</h3>
-                </button>
+                <input
+                  id="file-upload"
+                  type="file"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
 
                 <h3>Drage & drop file to upload</h3>
             </div>
 
-            <div className="w-[90%] border border-black mx-auto">
-                <div className="w-1/2 flex items-center w-72 border border-gray-300 bg-white rounded-[8px] px-4 py-2 space-x-2">
-                        <img src="/Icons/search.png"/>
-                        <input
-                            type="text"
-                            placeholder="Search..."
-                            className="flex-1 outline-none w-[100%]"
-                        />
+            
+              <div className="w-[90%] border border-black mx-auto">
+              <div className="w-full max-w-md flex items-center border border-gray-300 rounded-md bg-white focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-blue-400 transition">
+                
+                <div className="p-2 flex items-center ">
+                  <Image
+                    src="/Icons/search.png"
+                    alt="search icon"
+                    width={20}
+                    height={20}
+                    className="text-gray-500"
+                  />
                 </div>
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  className="flex-1 px-3 py-2 text-sm outline-none bg-transparent placeholder-gray-400"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                />
+              </div>
 
                 <div className="w-[100%] mx-auto p-6">
-                    <div>
-                        <div className="w-[100%] grid grid-cols-4 ">
-                            <Checkbox/>
-                            <h3>Name</h3>
-                            <h3>upload date</h3>
-                            <h3>Action</h3>
-                        </div>
-
-                        <div className="w-[100%] mx-auto pt-4">
-                          {
-                            schemaData.map((file,index)=>(
-                              <FileTemplaet key={index} fileData={file}/>
-                            ))
-                          }
-                            
-                            <hr className="border-t-2 border-gray-400 my-6" />
-                        </div>
+                    <div className="w-full grid grid-cols-[2fr_1fr_1fr] items-center py-3 px-4 gap-4 rounded-lg hover:bg-gray-50 transition">
+                        {/* <Checkbox/> */}
+                        <h3>Name</h3>
+                        <h3>upload date</h3>
+                        <h3>Action</h3>
                     </div>
+
+                    <div className="w-full mx-auto pt-4">
+                        {(results.length > 0 ? results : schemaData).map((file, index) => (
+                          <FileTemplaet key={index} fileData={file} onDelete={handleDelete} />
+                        ))}
+                  </div>
+
                 </div>
-                
-            </div>
-            
-        </div> 
-     );
+              </div>
+                  
+            </div> 
+  );
 }
 
 export default Page;
