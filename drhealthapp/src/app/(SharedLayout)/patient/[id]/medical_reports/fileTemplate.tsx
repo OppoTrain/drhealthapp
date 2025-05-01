@@ -35,79 +35,42 @@ interface FileTemplateProps {
 function FileTemplate({ fileData, onDelete }: FileTemplateProps) {
   const supabase = createClient();
 
-  // const handleDelete = async () => {
-  //   try {
-  //     // Delete file from storage
-  //     const filePath = `${fileData.user_id}/${fileData.file_name}`;
-  //     const { error: storageError } = await supabase
-  //       .storage
-  //       .from("files")
-  //       .remove([filePath]);
-
-  //     if (storageError) {
-  //       throw new Error(storageError.message);
-  //     }
-
-  //     // Delete file metadata from database
-  //     const { error: dbError } = await supabase
-  //       .from("files")
-  //       .delete()
-  //       .eq("id", fileData.id);
-
-  //     if (dbError) {
-  //       throw new Error(dbError.message);
-  //     }
-
-  //     // Trigger the onDelete callback if provided
-  //     if (onDelete) {
-  //       onDelete(fileData.id);
-  //     }
-  //   } catch (error: unknown) {
-  //     if (error instanceof Error) {
-  //       console.error("Error deleting file:", error.message);
-  //     } else {
-  //       console.error("Error deleting file:", error);
-  //     }
-  //   }
-  // };
-
   return (
-      <div className="w-full grid grid-cols-[2fr_1fr_1fr] items-center py-3 px-4 gap-4 rounded-lg hover:bg-gray-50 transition">
-    {/* File Info */}
-    <div className="flex items-center space-x-3">
-      <svg
-        className="w-5 h-5 text-gray-500 flex-shrink-0"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"
-        />
-      </svg>
-      <div className="min-w-0">
-        <div className="font-medium text-gray-800 truncate">{fileData.file_name}</div>
-        <div className="text-sm text-gray-500">{formatFileSize(fileData.file_size ?? 0)}</div>
+    <div className="w-full grid grid-cols-[2fr_1fr_1fr] items-center py-3 px-4 gap-4 rounded-lg hover:bg-gray-50 transition">
+      <div className="flex items-center space-x-3">
+        <svg
+          className="w-5 h-5 text-gray-500 flex-shrink-0"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"
+          />
+        </svg>
+        <div className="min-w-0">
+          <div className="font-medium text-gray-800 truncate">{fileData.file_name}</div>
+          <div className="text-sm text-gray-500">{formatFileSize(fileData.file_size ?? 0)}</div>
+        </div>
+      </div>
+
+      {/* Created Date */}
+      <div className="text-sm text-gray-600 truncate">{fileData.created_at}</div>
+
+      {/* Delete Button */}
+      <div className="flex justify-end">
+        <button
+            onClick={() => onDelete(fileData.id)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white rounded-md text-sm font-medium hover:bg-red-600 transition focus:outline-none focus:ring-2 focus:ring-red-300"
+        >
+          <Image src="/Icons/delete.png" width={16} height={16} alt="delete icon" className="flex-shrink-0" />
+          <span>Delete</span>
+        </button>
       </div>
     </div>
-
-    {/* Created Date */}
-    <div className="text-sm text-gray-600 truncate">{fileData.created_at}</div>
-
-    {/* Delete Button */}
-    <div className="flex justify-end">
-      <button
-          onClick={() => onDelete(fileData.id)}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white rounded-md text-sm font-medium hover:bg-red-600 transition focus:outline-none focus:ring-2 focus:ring-red-300"
-      >
-        <Image src="/Icons/delete.png" width={16} height={16} alt="delete icon" className="flex-shrink-0" />
-        <span>Delete</span>
-      </button>
-    </div>
-  </div>
   );
 }
 

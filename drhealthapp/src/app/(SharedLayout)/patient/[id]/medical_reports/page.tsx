@@ -94,7 +94,6 @@ function Page({ params }: { params: { id: string } }) {
             }
           });
         } else {
-          // Use DataTransfer interface to access the file(s)
           Array.from(ev.dataTransfer.files).forEach((file, i) => {
             console.log(`… file[${i}].name = ${file.name}`);
           });
@@ -103,9 +102,7 @@ function Page({ params }: { params: { id: string } }) {
 
       function dragOverHandler(ev: React.DragEvent<HTMLDivElement>) {
         console.log("File(s) in drop zone");
-      
-        // Prevent default behavior (Prevent file from being opened)
-        ev.preventDefault();
+              ev.preventDefault();
       }
 
       useEffect(() => {
@@ -131,24 +128,43 @@ function Page({ params }: { params: { id: string } }) {
         return () => clearTimeout(delayDebounce);
       }, [query]);
 
-      function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+      async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
         const files = event.target.files;
-        if (files && files.length > 0) {
-          const file = files[0];
-          console.log(`Selected file: ${file.name}`);
-          uploadFile(file);
+        if (!files || files.length === 0) {
+          console.error("No files selected");
+          return;
         }
-        supabase
-          .storage
-          .from("files")
-          .upload(`${params.id}/${files}`, files)
-          .then(({ data, error }) => {
-            if (error) {
-              console.error("Error uploading file:", error.message);
-            } else {
-              console.log("File uploaded successfully:", data);
+      
+        const fileArray = Array.from(files);
+        for (const file of fileArray) {
+          try {
+            const { data: uploadData, error: uploadError } = await supabase
+              .storage
+              .from("files")
+              .upload(`${params.id}/${file.name}`, file);
+      
+            if (uploadError) {
+              console.error(`Error uploading ${file.name}:`, uploadError.message);
+              continue; 
             }
-          });
+      
+            console.log(`Uploaded ${file.name}:`, uploadData);
+      
+            const { error: insertError } = await supabase
+              .from("Files")
+              .insert({
+                file_name: file.name,
+                file_size: file.size,
+                user_id: params.id,
+              });
+      
+            if (insertError) {
+              console.error(`Error inserting ${file.name} metadata:`, insertError.message);
+            }
+          } catch (error) {
+            console.error(`Unexpected error processing ${file.name}:`, error);
+          }
+        }
       }
     return (
         <div className="w-full">
@@ -212,7 +228,7 @@ function Page({ params }: { params: { id: string } }) {
             </div>
 
             
-              <div className="w-[90%] border border-black mx-auto">
+              <div className="w-[90%] border border mx-auto">
               <div className="w-full max-w-md flex items-center border border-gray-300 rounded-md bg-white focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-blue-400 transition">
                 
                 <div className="p-2 flex items-center ">
