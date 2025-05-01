@@ -39,6 +39,12 @@ const navItems = [
         path:"medical_reports",
         icon:'/Icons/upload.png',
         tap:'MedicalReports',
+    },
+    {
+        name:'Concilusion',
+        path:"concilusion",
+        icon:'/Icons/summarize.png',
+        tap:'Concilusion',
     }
 ];
 
