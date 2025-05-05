@@ -4,29 +4,90 @@ import Card from "./symptomsCard";
 import { useEffect, useState } from "react";
 import { SymptomCategory } from "./types";
 
+interface PatientSymptomResponse {
+  symptoms: {
+    id: number;
+    symptoms_categories: {
+      id: number;
+    };
+  };
+}
 
 export default function SymptomsAndSigns({ params }: { params: { id: string } }) {
   const [data, setData] = useState<SymptomCategory[]>([]);
   const [selectedSymptoms, setSelectedSymptoms] = useState<Record<number, number | string[]>>({});
   const supabase = createClient();
+  // useEffect(() => {
+  //   setSelectedSymptoms({
+  //     1: ["3"],
+  //     2: ["5","6"],
+  //     7: ["22"], 
+  //     4: ["12","13","14"]
+  //   });
+  // }, []);
+  // console.log("selectedSymptoms",selectedSymptoms);
+
+
 
   useEffect(() => {
-    const getData = async () => {
+    // Fetch all symptoms categories and their symptoms
+    const fetchSymptomsData = async () => {
       const { data, error } = await supabase
         .from("symptoms_categories")
         .select("*, symptoms(*)")
         .order("id", { ascending: true });
 
       if (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching symptoms categories:", error);
       } else {
-        console.log("Fetched data:", data);
         setData(data);
       }
     };
 
-    getData();
-  }, []);
+    fetchSymptomsData();
+  }, []); 
+
+
+  
+  useEffect(() => {
+    const fetchPatientSymptoms = async () => {
+      const { data: patientData, error } = await supabase
+        .from("patient_symptoms")
+        .select("symptoms(id,symptoms_categories(id))")
+        .eq("patient_id", params.id);
+
+      if (error) {
+        console.error("Error fetching patient symptoms:", error);
+      } else {
+        console.log("Raw patient data:", JSON.stringify(patientData, null, 2));
+        if (patientData) {
+          // Group symptoms by category
+          const symptomsByCategory: Record<number, string[]> = {};
+          
+          (patientData as unknown as PatientSymptomResponse[]).forEach(item => {
+            if (!item.symptoms?.id || !item.symptoms?.symptoms_categories?.id) {
+              console.warn('Invalid symptom data structure:', JSON.stringify(item, null, 2));
+              return;
+            }
+            
+            const categoryId = item.symptoms.symptoms_categories.id;
+            const symptomId = item.symptoms.id.toString();
+            
+            if (!symptomsByCategory[categoryId]) {
+              symptomsByCategory[categoryId] = [];
+            }
+            
+            symptomsByCategory[categoryId].push(symptomId);
+          });
+
+          // Set all symptoms at once
+          setSelectedSymptoms(symptomsByCategory);
+        }
+      }
+    };
+
+    fetchPatientSymptoms();
+  }, [params.id, supabase]);
 
   
   const deleteExcisted =async()=>{

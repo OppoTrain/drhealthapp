@@ -52,7 +52,7 @@ function FileTemplate({ fileData, onDelete }: FileTemplateProps) {
           />
         </svg>
         <div className="min-w-0">
-          <div className="font-medium text-gray-800 truncate">{fileData.file_name}</div>
+          <a href={`https://ydefblvrdypjtskvjnrh.supabase.co/storage/v1/object/public/files//${fileData.user_id}/${fileData.file_name}`} target="_blank" className="font-medium text-gray-800 truncate hover:text-blue-600">{fileData.file_name}</a>
           <div className="text-sm text-gray-500">{formatFileSize(fileData.file_size ?? 0)}</div>
         </div>
       </div>
