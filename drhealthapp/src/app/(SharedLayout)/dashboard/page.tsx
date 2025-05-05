@@ -25,7 +25,7 @@ export default function Dashboard() {
   const [clients, setClients] = useState<Patient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const { isOpen, onOpen, onOpenChange } = useDisclosure()
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   useEffect(() => {
     const checkSession = async () => {
@@ -94,7 +94,7 @@ export default function Dashboard() {
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-4">
-            <h1 className="text-2xl font-medium text-gray-800">Clients</h1>
+            <h1 className="text-[25px] font-black text-[#333434]">Clients</h1>
           </div>
         </div>
       </div>
@@ -102,18 +102,18 @@ export default function Dashboard() {
       {/* Search and Add Client controls */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex justify-end items-center gap-2">
-          <div className="relative">
+          <div className="flex rounded-md shadow-sm overflow-hidden border border-gray-300 focus-within:ring-2 focus-within:ring-teal-600">
             <input
               type="text"
               placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              className="border border-gray-300 rounded-md px-3 py-2 pr-10 w-64 focus:outline-none"
+              className="px-3 py-2 w-64 focus:outline-none"
             />
             <button
               onClick={handleSearch}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-teal-600"
+              className="bg-teal-600 px-3 flex items-center justify-center text-white"
               aria-label="Search"
             >
               <svg
@@ -131,6 +131,7 @@ export default function Dashboard() {
               </svg>
             </button>
           </div>
+
           <button
             onClick={onOpen}
             aria-label="add-client"
