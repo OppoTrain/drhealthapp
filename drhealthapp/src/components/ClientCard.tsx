@@ -1,10 +1,10 @@
-'use-client'
+"use-client";
 import Image from "next/image";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 
 interface ClientProps {
   patient: {
-    patient_id:string,
+    patient_id: string;
     patient_name: string;
     gender: string;
     birth_date: string;
@@ -41,7 +41,10 @@ export default function ClientCard({ patient }: ClientProps) {
   const age = calculateAge(patient.birth_date);
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden cursor-pointer" onClick={()=>router.push(`/patient/${patient.patient_id}/profile_info`)}>
+    <div
+      className="bg-white rounded-lg shadow overflow-hidden cursor-pointer"
+      onClick={() => router.push(`/patient/${patient.patient_id}/profile_info`)}
+    >
       <div className="p-6">
         <div className="flex items-center mb-4">
           <div className="mr-4">
