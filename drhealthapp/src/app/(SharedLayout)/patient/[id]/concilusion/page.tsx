@@ -42,7 +42,6 @@ export default function MedicalInfoPage({ params }: { params: { id: string } }) 
     fetchMedicalInfo();
   }, [params.id, supabase]);
 
-  // Let's try separating the form configuration from values and handlers
   const formFields = useMemo(() => [
     {
       name: 'conclusion',
@@ -70,14 +69,14 @@ export default function MedicalInfoPage({ params }: { params: { id: string } }) 
 
   const handleCancel = () => router.push('/dashboard');
 
-  // Simplified form configuration
+  // Using the correct property name: inputColumns instead of columns
   const formConfig = {
     fields: formFields,
     onSubmit: handleSubmit,
     onCancel: handleCancel,
     title: 'Conclusion',
     submitButtonText: 'Save',
-    columns: 2,  // Instead of inputColumns (this is a guess)
+    inputColumns: 2,  // Corrected property name
   };
 
   if (loading) {
