@@ -19,6 +19,9 @@ interface FormValues {
     hip_circumference: string;
 }
 
+// Define valid field types according to the FormField type
+type FormFieldType = "number" | "select" | "textarea" | "text" | "checkbox" | "date" | "email" | "password" | "radio" | "tel" | "textGender" | "textMaritalState";
+
 export default function Page({ params }: { params: { id: string } }) {
     const [loading, setLoading] = useState(true);
     const [initialValues, setInitialValues] = useState<BodyMeasurements>({
@@ -68,7 +71,7 @@ export default function Page({ params }: { params: { id: string } }) {
             {
                 name: 'weight',
                 label: 'Weight (kg)',
-                type: 'number',
+                type: "number" as FormFieldType,
                 min: 30,
                 max: 300,
                 required: true,
@@ -79,14 +82,14 @@ export default function Page({ params }: { params: { id: string } }) {
                 label: 'Height (cm)',
                 min: 50,
                 max: 200,
-                type: 'number',
+                type: "number" as FormFieldType,
                 required: true,
                 initialValue: initialValues.height
             },
             {
                 name: 'waist_circumference',
                 label: 'Waist Circumference (cm)',
-                type: 'number',
+                type: "number" as FormFieldType,
                 min: 30,
                 max: 300,
                 required: true,
@@ -95,7 +98,7 @@ export default function Page({ params }: { params: { id: string } }) {
             {
                 name: 'hip_circumference',
                 label: 'Hip Circumference (cm)',
-                type: 'number',
+                type: "number" as FormFieldType,
                 min: 30,
                 max: 300,
                 required: true,
