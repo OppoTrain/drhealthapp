@@ -13,26 +13,52 @@ const InputFactory = ({ config, control, errors }) => {
 
     switch (config.type) {
         case 'select':
+            // return (
+            //     <Controller
+            //         name={config.name}
+            //         control={control}
+            //         render={({ field: { onChange, value } }) => (
+            //             <Select
+            //                 {...commonProps}
+            //                 value={value}
+            //                 onChange={onChange}
+            //                 placeholder={`Select ${config.label.toLowerCase()}`}
+            //             >
+            //                 {config.options?.map((option) => (
+            //                     <SelectItem key={option.value} value={option.value}>
+            //                         {option.label}
+            //                     </SelectItem>
+            //                 ))}
+            //             </Select>
+            //         )}
+            //     />
+            // );
+
             return (
                 <Controller
-                    name={config.name}
-                    control={control}
-                    render={({ field: { onChange, value } }) => (
-                        <Select
-                            {...commonProps}
-                            value={value}
-                            onChange={onChange}
-                            placeholder={`Select ${config.label.toLowerCase()}`}
-                        >
-                            {config.options?.map((option) => (
-                                <SelectItem key={option.value} value={option.value}>
-                                    {option.label}
-                                </SelectItem>
-                            ))}
-                        </Select>
-                    )}
+                  name={config.name}
+                  control={control}
+                  render={({ field }) => (
+                    <div className="h-full"> {/* Parent container with full height */}
+                      <select
+                        {...field}
+                        className="p-2 block w-full h-[56%] rounded-xl border border-[#E0E0E0] bg-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      >
+                        {/* Show empty option if no value is selected */}
+                        {!field.value && <option value="">Select an option</option>}
+                        {config.options.map((option) => (
+                          <option 
+                            key={option.value} 
+                            value={option.value}
+                          >
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 />
-            );
+              );
 
         case 'textarea':
             return (
