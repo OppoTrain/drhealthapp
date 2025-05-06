@@ -5,11 +5,25 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+interface BodyMeasurements {
+    weight: string | number;
+    height: string | number;
+    waistCircumference: string | number;
+    hipCircumference: string | number;
+}
+
 export default function Page({ params }: { params: { id: string } }) {
     const [loading, setLoading] = useState(true);
-    const [initialValues, setInitialValues] = useState({});
+    const [initialValues, setInitialValues] = useState<BodyMeasurements>({
+        weight: '',
+        height: '',
+        waistCircumference: '',
+        hipCircumference: '',
+    });
     const supabase = createClient();
     const router = useRouter();
+
+    
 
     useEffect(() => {
         const getClientBodyMeasurements = async () => {
