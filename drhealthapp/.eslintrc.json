@@ -9,8 +9,7 @@
   "extends": [
     "next/core-web-vitals", // This includes TypeScript and recommended rules
     "eslint:recommended",  // It's generally a good idea to keep this for base ESLint rules
-    "plugin:@typescript-eslint/recommended",
-    "plugin:prettier/recommended" // Make sure prettier is last
+    "plugin:@typescript-eslint/recommended"
   ],
   "plugins": [
     "@typescript-eslint",
