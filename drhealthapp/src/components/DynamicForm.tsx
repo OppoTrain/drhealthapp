@@ -140,15 +140,8 @@ const getZodSchema = (fields: FormField[]) => {
 };
 
 const DynamicForm: React.FC<{ formConfig: FormConfig }> = ({ formConfig }) => {
-    // Add validation for formConfig
-    if (!formConfig) {
-        console.error("DynamicForm: formConfig is undefined");
-        return <div className="p-6 bg-white">Form configuration is missing</div>;
-    }
-
-    // Make sure fields exist before trying to use them
-    const fields = formConfig.fields || [];
-    
+    // Move the validation after hooks to avoid conditional hook calls
+    const fields = formConfig?.fields || [];
     const schema = getZodSchema(fields);
 
     const {
@@ -163,6 +156,12 @@ const DynamicForm: React.FC<{ formConfig: FormConfig }> = ({ formConfig }) => {
             [field.name]: field.initialValue ?? (field.type === 'checkbox' ? false : ''),
         }), {} as Record<string, any>),
     });
+
+    // After hooks are called, we can do conditional rendering
+    if (!formConfig) {
+        console.error("DynamicForm: formConfig is undefined");
+        return <div className="p-6 bg-white">Form configuration is missing</div>;
+    }
 
 
     return (
