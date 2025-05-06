@@ -33,12 +33,21 @@ interface FormConfig {
   onCancel?: () => void;
 }
 
+// Define areas array (this was missing in original code)
+const areas: { id: number; [key: string]: any }[] = [];
+
 // Map field types to Zod validation rules
 const getZodSchema = (fields: FormField[]) => {
+    // Add safety check to prevent the TypeError
+    if (!fields || !Array.isArray(fields)) {
+        console.warn("getZodSchema called with invalid fields:", fields);
+        return z.object({});
+    }
+
     const schemaShape = fields.reduce((acc, field) => {
         let schema;
         if(field.required){
-            field.minLength = 1;
+            field.minLength = field.minLength || 1;
         }
         switch (field.type) {
             case 'number':
@@ -127,12 +136,17 @@ const getZodSchema = (fields: FormField[]) => {
     return z.object(schemaShape);
 };
 
-// Note: 'areas' is referenced but not defined in the original code
-// You'll need to define this variable or pass it as a parameter
-const areas: { id: number; [key: string]: any }[] = [];
-
 const DynamicForm: React.FC<{ formConfig: FormConfig }> = ({ formConfig }) => {
-    const schema = getZodSchema(formConfig.fields);
+    // Add validation for formConfig
+    if (!formConfig) {
+        console.error("DynamicForm: formConfig is undefined");
+        return <div className="p-6 bg-white">Form configuration is missing</div>;
+    }
+
+    // Make sure fields exist before trying to use them
+    const fields = formConfig.fields || [];
+    
+    const schema = getZodSchema(fields);
 
     const {
         control,
@@ -141,7 +155,7 @@ const DynamicForm: React.FC<{ formConfig: FormConfig }> = ({ formConfig }) => {
         reset,
     } = useForm({
         resolver: zodResolver(schema),
-        defaultValues: formConfig.fields.reduce((acc, field) => ({
+        defaultValues: fields.reduce((acc, field) => ({
             ...acc,
             [field.name]: field.initialValue ?? (field.type === 'checkbox' ? false : ''),
         }), {} as Record<string, any>),
@@ -153,7 +167,7 @@ const DynamicForm: React.FC<{ formConfig: FormConfig }> = ({ formConfig }) => {
             <h2 className="text-2xl font-bold text-gray-800 mb-6">{formConfig.title}</h2>
             <form onSubmit={handleSubmit(formConfig.onSubmit)} className="space-y-6">
                 <div className={`grid grid-cols-1 md:grid-cols-${formConfig.inputColumns} gap-6`}>
-                    {formConfig.fields.map((field) => (
+                    {fields.map((field) => (
                         <div key={field.name} className="space-y-2" style={{
                             gridColumnStart: 'auto', // Let grid auto-place columns
                             gridColumnEnd: `span ${field.columnTakes || 1}`, // Span columns based on columnTakes
