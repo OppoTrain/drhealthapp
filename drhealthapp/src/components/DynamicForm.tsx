@@ -4,15 +4,43 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import InputFactory from './InputFactory';
 
+// Define interfaces for form configuration
+interface FieldOption {
+  label: string;
+  value: string | number;
+}
+
+interface FormField {
+  name: string;
+  label: string;
+  type: 'text' | 'textarea' | 'number' | 'email' | 'password' | 'tel' | 'date' | 'select' | 'checkbox' | 'radio' | 'textGender' | 'textMaritalState';
+  required?: boolean;
+  minLength?: number;
+  maxLength?: number;
+  min?: number;
+  max?: number;
+  options?: FieldOption[];
+  initialValue?: string | number | boolean;
+  columnTakes?: number;
+}
+
+interface FormConfig {
+  title: string;
+  inputColumns: number;
+  fields: FormField[];
+  submitButtonText?: string;
+  onSubmit: (data: any) => void;
+  onCancel?: () => void;
+}
+
 // Map field types to Zod validation rules
-const getZodSchema = (fields) => {
+const getZodSchema = (fields: FormField[]) => {
     const schemaShape = fields.reduce((acc, field) => {
         let schema;
         if(field.required){
-            field.minLength=1
+            field.minLength = 1;
         }
         switch (field.type) {
-
             case 'number':
                 schema = z.coerce.number();
                 if (field.min !== undefined) {
@@ -25,21 +53,16 @@ const getZodSchema = (fields) => {
             case 'select':
                 if (field.name === 'residential_area') {
                     schema = z.coerce.number() // Ensure number type
-                      .refine(val => areas.some(area => area.id === val), {
+                      .refine(val => areas.some((area: any) => area.id === val), {
                         message: `Please select a valid ${field.label}`
                       });
-                  } 
-                // if (field.name === 'residential_area') {
-                //     schema = z.coerce.number()  // Will convert string inputs to numbers
-                //       .refine(val => field.options.some(opt => opt.value === val), {
-                //         message: `Please select a valid ${field.label}`
-                //       });
-                    
-                //     if (field.required) {
-                //       schema = schema.min(1, { message: `${field.label} is required` });
-                //     }
-                //   }
-                //   break;
+                } else {
+                    schema = z.string();
+                    if (field.required) {
+                        schema = schema.min(1, `${field.label} is required`);
+                    }
+                }
+                break;
             case 'text':
             case 'textarea':
                 schema = z.string();
@@ -56,8 +79,6 @@ const getZodSchema = (fields) => {
             case 'email':
                 schema = z.string().email(`Invalid ${field.label.toLowerCase()} format`);
                 break;
-            
-            
             case 'password':
                 schema = z.string().min(8, `${field.label} must be at least 8 characters`)
                 break;
@@ -75,7 +96,6 @@ const getZodSchema = (fields) => {
                 message: 'Gender must be either "Male" or "Female"'
                 });
                 break;
-
             case 'textMaritalState':
                 schema = z.string()
                 .refine(value => ['Married', 'Single' , 'Armal'].includes(value), {
@@ -87,6 +107,8 @@ const getZodSchema = (fields) => {
                     schema = z.enum(['true', 'false'], {
                       errorMap: () => ({ message: `Please select pregnancy status` })
                     });
+                } else {
+                    schema = z.string();
                 }
                 break;
             case 'checkbox':
@@ -100,12 +122,16 @@ const getZodSchema = (fields) => {
             ...acc,
             [field.name]: schema,
         };
-    }, {});
+    }, {} as Record<string, z.ZodTypeAny>);
 
     return z.object(schemaShape);
 };
 
-const DynamicForm = ({ formConfig }) => {
+// Note: 'areas' is referenced but not defined in the original code
+// You'll need to define this variable or pass it as a parameter
+const areas: { id: number; [key: string]: any }[] = [];
+
+const DynamicForm: React.FC<{ formConfig: FormConfig }> = ({ formConfig }) => {
     const schema = getZodSchema(formConfig.fields);
 
     const {
@@ -117,16 +143,8 @@ const DynamicForm = ({ formConfig }) => {
         resolver: zodResolver(schema),
         defaultValues: formConfig.fields.reduce((acc, field) => ({
             ...acc,
-            
-            [field.name]: 
-                // field.type === 'select' && field.name === 'residential_area' 
-                // ? Number(field.initialValue) || undefined // Convert to number
-                // : field.initialValue ?? (field.type === 'checkbox' ? false : ''),
-
-            // field.type === 'select' 
-            // ? field.initialValue || '' // Keep as string or whatever type your options use
-             field.initialValue ?? (field.type === 'checkbox' ? false : ''),
-        }), {}),
+            [field.name]: field.initialValue ?? (field.type === 'checkbox' ? false : ''),
+        }), {} as Record<string, any>),
     });
 
 
@@ -151,31 +169,18 @@ const DynamicForm = ({ formConfig }) => {
                                 config={field}
                                 control={control}
                                 errors={errors}
-                                
-
-
-                                
                             />
                             {field.type === 'checkbox' && errors[field.name] && (
                                 <div className="text-red-500 text-sm mt-1">
                                     {errors[field.name]?.message}
                                 </div>
                             )}
-
-                            
-
-
-
-
-
-
-
                         </div>
                     ))}
                 </div>
                 <div className="mt-8 flex justify-end space-x-4">
                     {   
-                        formConfig.onCancel&&
+                        formConfig.onCancel &&
                         <button
                             type="button"
                             onClick={() => {
