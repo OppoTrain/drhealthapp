@@ -5,8 +5,26 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-// Import the FormConfig and FormField types from your component
-import { FormConfig, FormField } from "@/components/DynamicForm"; // Adjust this import path if needed
+// Define our own types that match what DynamicForm expects
+type FieldType = 'text' | 'number' | 'select' | 'textarea' | 'checkbox' | 'date' | 'email' | 'password' | 'radio' | 'tel' | 'textGender' | 'textMaritalState';
+
+interface FormField {
+    name: string;
+    label: string;
+    type: FieldType;
+    required: boolean;
+    initialValue?: string | number;
+    // Add other possible properties as needed
+}
+
+interface FormConfig {
+    inputColumns: number;
+    title: string;
+    fields: FormField[];
+    submitButtonText: string;
+    onSubmit: (values: any) => Promise<void> | void;
+    onCancel?: () => void;
+}
 
 interface MedicalInfo {
     chronicDiseases: string | number;
