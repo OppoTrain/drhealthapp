@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+// import { useState } from "react";
 import { RadioGroup, Radio } from "@heroui/react";
 import { CheckboxGroup, Checkbox } from "@heroui/react";
 import { SymptomCategory } from "@/app/(SharedLayout)/patient/[id]/symptoms_and_signs/types";

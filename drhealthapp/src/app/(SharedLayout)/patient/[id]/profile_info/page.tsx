@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import DynamicForm from "@/components/DynamicForm";
-import { label, option } from "framer-motion/client";
+// import { label, option } from "framer-motion/client";
 
 
 

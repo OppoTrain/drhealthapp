@@ -1,6 +1,6 @@
 import React from 'react';
 import { Controller } from 'react-hook-form';
-import { Input, Select, SelectItem, Textarea, RadioGroup, Radio, Checkbox } from '@heroui/react';
+import { Input, Textarea, RadioGroup, Radio, Checkbox } from '@heroui/react';
 
 const InputFactory = ({ config, control, errors }) => {
     const commonProps = {

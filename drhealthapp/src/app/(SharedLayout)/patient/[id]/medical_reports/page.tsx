@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import FileTemplaet from "./fileTemplate";
 import Image from "next/image";
-import { sup } from "framer-motion/client";
+// import { sup } from "framer-motion/client";
 
 interface InsertedFile {
   id: string;
@@ -15,7 +15,7 @@ interface InsertedFile {
 
 
 function Page({ params }: { params: { id: string } }) {
-    const [uploading, setUploading] = useState(false);
+    // const [uploading, setUploading] = useState(false);
     const supabase= createClient()
     const [schemaData, setSchemaData] = useState<InsertedFile[]>([]);
     const [query, setQuery] = useState('');
@@ -58,7 +58,7 @@ function Page({ params }: { params: { id: string } }) {
     }, [params.id]); 
 
     const uploadFile = async (file: File) => {
-        setUploading(true);
+        // setUploading(true);
         const fileBath=`${params.id}/${file.name}`
         const { } = await supabase
           .storage
@@ -78,7 +78,7 @@ function Page({ params }: { params: { id: string } }) {
           console.log("Upload successful:", schema);
           console.log(file.size)
         }
-        setUploading(false);
+        // setUploading(false);
       };
 
     function dropHandler(ev: React.DragEvent<HTMLDivElement>) {

@@ -17,15 +17,6 @@ export default function SymptomsAndSigns({ params }: { params: { id: string } })
   const [data, setData] = useState<SymptomCategory[]>([]);
   const [selectedSymptoms, setSelectedSymptoms] = useState<Record<number, number | string[]>>({});
   const supabase = createClient();
-  // useEffect(() => {
-  //   setSelectedSymptoms({
-  //     1: ["3"],
-  //     2: ["5","6"],
-  //     7: ["22"], 
-  //     4: ["12","13","14"]
-  //   });
-  // }, []);
-  // console.log("selectedSymptoms",selectedSymptoms);
 
 
 
@@ -91,7 +82,7 @@ export default function SymptomsAndSigns({ params }: { params: { id: string } })
 
   
   const deleteExcisted =async()=>{
-    const {data,error} = await supabase
+     await supabase
       .from("patient_symptoms")
       .delete()
       .eq("patient_id", params.id);
