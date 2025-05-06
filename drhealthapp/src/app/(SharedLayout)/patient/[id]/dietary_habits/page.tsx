@@ -1,8 +1,27 @@
 'use client'
+
 import DynamicForm from "@/components/DynamicForm";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+
+// Import or define the FormConfig type to match DynamicForm's requirements
+interface FormField {
+    name: string;
+    label: string;
+    type: string;
+    required: boolean;
+    initialValue: string | number;
+}
+
+interface FormConfig {
+    inputColumns: number;
+    title: string;
+    fields: FormField[];
+    submitButtonText: string;
+    onSubmit: (values: any) => Promise<void>;
+    onCancel: () => void;
+}
 
 interface DietaryInfo {
     dietaryHabits: string | number;
@@ -50,7 +69,7 @@ export default function Page({ params }: { params: { id: string } }) {
         getClientDietaryInfo();
     }, [params.id]);
 
-    const formConfig = {
+    const formConfig: FormConfig = {
         inputColumns: 2,
         title: 'Dietary Habits',
         fields: [
