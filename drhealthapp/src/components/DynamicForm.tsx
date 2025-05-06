@@ -1,5 +1,5 @@
 import React from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, FieldErrors } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import InputFactory from './InputFactory';
@@ -32,6 +32,9 @@ interface FormConfig {
   onSubmit: (data: any) => void;
   onCancel?: () => void;
 }
+
+// Define the form data type based on fields
+type FormData = Record<string, any>;
 
 // Define areas array (this was missing in original code)
 const areas: { id: number; [key: string]: any }[] = [];
@@ -153,7 +156,7 @@ const DynamicForm: React.FC<{ formConfig: FormConfig }> = ({ formConfig }) => {
         handleSubmit,
         formState: { errors, isSubmitting },
         reset,
-    } = useForm({
+    } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: fields.reduce((acc, field) => ({
             ...acc,
@@ -182,11 +185,11 @@ const DynamicForm: React.FC<{ formConfig: FormConfig }> = ({ formConfig }) => {
                             <InputFactory
                                 config={field}
                                 control={control}
-                                errors={errors}
+                                errors={errors as FieldErrors<FormData>}
                             />
                             {field.type === 'checkbox' && errors[field.name] && (
                                 <div className="text-red-500 text-sm mt-1">
-                                    {errors[field.name]?.message?.toString()}
+                                    {(errors as any)[field.name]?.message?.toString()}
                                 </div>
                             )}
                         </div>
