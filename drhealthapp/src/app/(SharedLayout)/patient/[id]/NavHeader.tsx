@@ -1,6 +1,7 @@
 "use client";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import path from 'path';
 
 const navItems = [
     {
@@ -33,6 +34,18 @@ const navItems = [
         icon: '/Icons/conditions.png',
         tab: 'SymptomsAndSigns',
     },
+    {
+        name:'Medical reports',
+        path:"medical_reports",
+        icon:'/Icons/upload.png',
+        tap:'MedicalReports',
+    },
+    {
+        name:'Concilusion',
+        path:"concilusion",
+        icon:'/Icons/summarize.png',
+        tap:'Concilusion',
+    }
 ];
 
 const getTabClasses = (isActive: boolean) =>
