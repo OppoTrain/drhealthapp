@@ -322,5 +322,6 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
 
     if (loading) return <div>Loading...</div>;
 
-    return <DynamicForm formConfig={getFormConfig()} />;
+    return <DynamicForm formConfig={formConfig as any} />;
+
 }
