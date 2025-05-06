@@ -93,5 +93,5 @@ export default function MedicalInfoPage({ params }: { params: { id: string } }) 
     return <p className="text-red-500">{error}</p>;
   }
 
-  return <DynamicForm formConfig={formConfig} />;
+  return <DynamicForm formConfig={formConfig as any} />;
 }
