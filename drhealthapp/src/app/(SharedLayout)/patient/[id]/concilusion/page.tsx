@@ -1,5 +1,4 @@
 'use client';
-
 import DynamicForm from '@/components/DynamicForm';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
@@ -24,11 +23,11 @@ export default function MedicalInfoPage({ params }: { params: { id: string } }) 
           .select('conclusion')
           .eq('patient_id', params.id)
           .single();
-
+        
         if (error && error.code !== 'PGRST116') {
           throw error;
         }
-
+        
         if (data) {
           setInitialValues({ conclusion: data.conclusion });
         }
@@ -39,7 +38,7 @@ export default function MedicalInfoPage({ params }: { params: { id: string } }) 
         setLoading(false);
       }
     }
-
+    
     fetchMedicalInfo();
   }, [params.id, supabase]);
 
@@ -62,7 +61,7 @@ export default function MedicalInfoPage({ params }: { params: { id: string } }) 
           .from('patient')
           .update({ conclusion: values.conclusion })
           .eq('patient_id', params.id);
-
+        
         if (error) throw error;
         alert('Conclusion saved!');
       } catch (err) {
@@ -81,5 +80,6 @@ export default function MedicalInfoPage({ params }: { params: { id: string } }) 
     return <p className="text-red-500">{error}</p>;
   }
 
-  return <DynamicForm formConfig={{ ...formConfig, initialValues }} />;
+  // Fixed: Removed the initialValues property since it's not part of FormConfig
+  return <DynamicForm formConfig={formConfig} />;
 }
