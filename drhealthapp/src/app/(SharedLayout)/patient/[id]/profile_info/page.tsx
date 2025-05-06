@@ -248,8 +248,13 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
           }
         ],
         submitButtonText: 'Save',
+
+
         onSubmit: async (values: Record<string, any>) => {
           try {
+            // Convert radio button value to boolean properly
+            const pregnanceStatus = values.pregnance_status === 'true';
+        
             const formattedValues = {
               national_id: values.national_id,
               first_visit: values.first_visit || null,
@@ -258,11 +263,11 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
               sleep_hours: values.sleep_hours ? Number(values.sleep_hours) : null,
               children_number: values.children_number ? Number(values.children_number) : null,
               previos_births: values.previous_births ? Number(values.previous_births) : null,
-              pregnance_status: values.pregnance_status === "true",
+              pregnance_status: pregnanceStatus,
               pregnancy_weeks: values.pregnancy_weeks ? Number(values.pregnancy_weeks) : null,
               residential_area: values.residential_area ? Number(values.residential_area) : null,
             };
-
+        
             // Update patient basic info
             const { error: patientError } = await supabase
               .from('patient')
@@ -273,19 +278,19 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
                 gender: values.gender
               })
               .eq('patient_id', params.id);
-    
+        
             if (patientError) throw patientError;
-
-            // First check if any profile exists for this patient
+        
+            // Check for existing profile
             const { data: existingProfiles, error: fetchError } = await supabase
               .from('patient_profile')
               .select('id')
               .eq('patient_id', params.id);
-
+        
             if (fetchError) throw fetchError;
-
+        
             if (existingProfiles && existingProfiles.length > 0) {
-              // Update all matching profiles (though there should ideally be just one)
+              // Update existing profile
               const { error: updateError } = await supabase
                 .from('patient_profile')
                 .update(formattedValues)
@@ -300,16 +305,18 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
                   patient_id: params.id,
                   ...formattedValues
                 });
-
+        
               if (insertError) throw insertError;
             }
-
+        
             alert('Patient profile saved successfully!');
+            router.push('/dashboard'); // Consider redirecting after success
           } catch (err) {
             console.error('Error saving patient data:', err);
             alert('Failed to save patient data');
           }
         },
+    
         onCancel: () => router.push('/dashboard')
       };
 
