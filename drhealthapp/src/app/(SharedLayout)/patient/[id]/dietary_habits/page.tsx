@@ -132,5 +132,6 @@ export default function Page({ params }: { params: { id: string } }) {
         return <p>loading ... </p>;
     }
 
-    return <DynamicForm formConfig={formConfig} />;
+   return <DynamicForm formConfig={formConfig as any} />;
+
 }
