@@ -5,6 +5,9 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+// Import the FormConfig and FormField types from your component
+import { FormConfig, FormField } from "@/components/DynamicForm"; // Adjust this import path if needed
+
 interface MedicalInfo {
     chronicDiseases: string | number;
     recentSurgeries: string | number;
@@ -59,38 +62,38 @@ export default function Page({ params }: { params: { id: string } }) {
         getClientMedicalInfo();
     }, [params.id]);
 
-    const formConfig = {
+    const formConfig: FormConfig = {
         inputColumns: 2,
         title: 'Medical Info',
         fields: [
             {
                 name: 'chronic_diseases',
                 label: 'Chronic Diseases',
-                type: 'text',
+                type: 'text', // Using specific string literal type
                 required: true,
                 initialValue: initialValues.chronicDiseases
-            },
+            } as FormField,
             {
                 name: 'recent_surgeries_hospitalizations',
                 label: 'Recent Surgeries or Hospitalizations',
-                type: 'text',
+                type: 'text', // Using specific string literal type
                 required: true,
                 initialValue: initialValues.recentSurgeries
-            },
+            } as FormField,
             {
                 name: 'allergies_intolerances',
                 label: 'Known Allergies or Intolerances',
-                type: 'text',
+                type: 'text', // Using specific string literal type
                 required: true,
                 initialValue: initialValues.allergies
-            },
+            } as FormField,
             {
                 name: 'medications',
                 label: 'Medications or Supplements',
-                type: 'text',
+                type: 'text', // Using specific string literal type
                 required: true,
                 initialValue: initialValues.medications
-            },
+            } as FormField,
         ],
         submitButtonText: 'Save',
         onSubmit: async (values:FormValues) => {
