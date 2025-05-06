@@ -5,9 +5,30 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+
+interface MedicalInfo {
+    chronicDiseases: string | number;
+    recentSurgeries: string | number;
+    allergies: string | number;
+    medications: string | number;
+}
+
+interface FormValues {
+    chronic_diseases: string;
+    recent_surgeries_hospitalizations: string;
+    allergies_intolerances: string;
+    medications: string;
+}
+
+
 export default function Page({ params }: { params: { id: string } }) {
     const [loading, setLoading] = useState(true);
-    const [initialValues, setInitialValues] = useState({});
+    const [initialValues, setInitialValues] = useState<MedicalInfo>({
+        chronicDiseases: '',
+        recentSurgeries: '',
+        allergies: '',
+        medications: '',
+        });
     const supabase = createClient();
     const router = useRouter()
 
@@ -74,7 +95,7 @@ export default function Page({ params }: { params: { id: string } }) {
             },
         ],
         submitButtonText: 'Save',
-        onSubmit: async (values) => {
+        onSubmit: async (values:FormValues) => {
             try {
                 const hasInitialValues = Object.keys(initialValues).length > 0;
                 if (hasInitialValues) {

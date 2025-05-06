@@ -5,9 +5,27 @@ import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+interface DietaryInfo {
+    dietaryHabits: string | number;
+    socialEmotional: string | number;
+}
+
+
+interface FormValues {
+    dietary_habits: string;
+    social_and_emotional_considerations: string;
+}
+
+
+
+
+
 export default function Page({ params }: { params: { id: string } }) {
     const [loading, setLoading] = useState(true);
-    const [initialValues, setInitialValues] = useState({});
+    const [initialValues, setInitialValues] = useState<DietaryInfo>({
+        dietaryHabits: '',
+        socialEmotional: '',
+        });
     const supabase = createClient();
     const router = useRouter()
     useEffect(() => {
@@ -57,7 +75,7 @@ export default function Page({ params }: { params: { id: string } }) {
             },
         ],
         submitButtonText: 'Save',
-        onSubmit: async (values) => {
+        onSubmit: async (values:FormValues) => {
             try {
                 const hasInitialValues = Object.keys(initialValues).length > 0;
 

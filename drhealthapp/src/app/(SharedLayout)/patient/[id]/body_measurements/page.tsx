@@ -12,6 +12,13 @@ interface BodyMeasurements {
     hipCircumference: string | number;
 }
 
+interface FormValues {
+    weight: string;
+    height: string;
+    waist_circumference: string;
+    hip_circumference: string;
+}
+
 export default function Page({ params }: { params: { id: string } }) {
     const [loading, setLoading] = useState(true);
     const [initialValues, setInitialValues] = useState<BodyMeasurements>({
@@ -98,7 +105,7 @@ export default function Page({ params }: { params: { id: string } }) {
             },
         ],
         submitButtonText: 'Save',
-        onSubmit: async (values) => {
+        onSubmit: async (values: FormValues) => {
             try {
                 // Convert string inputs to numbers
                 const numericValues = {
@@ -130,7 +137,7 @@ export default function Page({ params }: { params: { id: string } }) {
                     alert('Body measurements saved!');
                 }
             } catch (err) {
-                console.error('Error saving body measurements:', err.message);
+                console.error('Error saving body measurements:', err instanceof Error ? err.message : 'Unknown error');
                 alert('Failed to save body measurements.');
             }
         },
