@@ -61,7 +61,7 @@ function FileTemplate({ fileData, onDelete }: FileTemplateProps) {
       <div className="text-sm text-gray-600 truncate">{fileData.created_at}</div>
 
       {/* Delete Button */}
-      <div className="flex justify-end">
+      <div className="flex justify-between">
         <button
             onClick={() => onDelete(fileData.id)}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white rounded-md text-sm font-medium hover:bg-red-600 transition focus:outline-none focus:ring-2 focus:ring-red-300"
@@ -69,7 +69,9 @@ function FileTemplate({ fileData, onDelete }: FileTemplateProps) {
           <Image src="/Icons/delete.png" width={16} height={16} alt="delete icon" className="flex-shrink-0" />
           <span>Delete</span>
         </button>
+
         <button
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500 text-white rounded-md text-sm font-medium hover:bg-green-600 transition focus:outline-none focus:ring-2 focus:ring-green-300"
             onClick={async () => {
               try {
                 const { data, error } = await supabase
@@ -102,8 +104,8 @@ function FileTemplate({ fileData, onDelete }: FileTemplateProps) {
                 console.error('Failed to download file:', err);
               }
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500 text-white rounded-md text-sm font-medium hover:bg-green-600 transition focus:outline-none focus:ring-2 focus:ring-green-300"
         >
+            <Image src="/Icons/downloading.png" width={16} height={16} alt="delete icon" className="flex-shrink-0" />
           <span>Download</span>
         </button>
       </div>
