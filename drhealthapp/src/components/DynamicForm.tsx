@@ -172,7 +172,7 @@ const DynamicForm: React.FC<{ formConfig: FormConfig }> = ({ formConfig }) => {
                             />
                             {field.type === 'checkbox' && errors[field.name] && (
                                 <div className="text-red-500 text-sm mt-1">
-                                    {errors[field.name]?.message}
+                                    {errors[field.name]?.message?.toString()}
                                 </div>
                             )}
                         </div>
