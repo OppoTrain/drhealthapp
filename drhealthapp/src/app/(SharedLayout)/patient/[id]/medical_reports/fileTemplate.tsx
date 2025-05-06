@@ -69,6 +69,43 @@ function FileTemplate({ fileData, onDelete }: FileTemplateProps) {
           <Image src="/Icons/delete.png" width={16} height={16} alt="delete icon" className="flex-shrink-0" />
           <span>Delete</span>
         </button>
+        <button
+            onClick={async () => {
+              try {
+                const { data, error } = await supabase
+                  .storage
+                  .from('files')
+                  .download(`${fileData.user_id}/${fileData.file_name}`);
+                
+                if (error) {
+                  console.error('Error downloading file:', error.message);
+                  return;
+                }
+
+                if (data) {
+                  // Create blob URL from the downloaded data
+                  const blob = new Blob([data], { type: 'application/octet-stream' });
+                  const url = window.URL.createObjectURL(blob);
+                  
+                  // Create download link
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.download = fileData.file_name;
+                  document.body.appendChild(link);
+                  link.click();
+                  
+                  // Cleanup
+                  window.URL.revokeObjectURL(url);
+                  document.body.removeChild(link);
+                }
+              } catch (err) {
+                console.error('Failed to download file:', err);
+              }
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500 text-white rounded-md text-sm font-medium hover:bg-green-600 transition focus:outline-none focus:ring-2 focus:ring-green-300"
+        >
+          <span>Download</span>
+        </button>
       </div>
     </div>
   );
