@@ -30,8 +30,6 @@ export default function Page({ params }: { params: { id: string } }) {
     const supabase = createClient();
     const router = useRouter();
 
-    
-
     useEffect(() => {
         const getClientBodyMeasurements = async () => {
             try {
@@ -71,37 +69,37 @@ export default function Page({ params }: { params: { id: string } }) {
                 name: 'weight',
                 label: 'Weight (kg)',
                 type: 'number',
-                min: 30,  // minimum value
+                min: 30,
                 max: 300,
                 required: true,
-                initialValue: initialValues?.weight
+                initialValue: initialValues.weight
             },
             {
                 name: 'height',
                 label: 'Height (cm)',
-                min: 50,  // minimum value
+                min: 50,
                 max: 200,
                 type: 'number',
                 required: true,
-                initialValue: initialValues?.height
+                initialValue: initialValues.height
             },
             {
                 name: 'waist_circumference',
                 label: 'Waist Circumference (cm)',
                 type: 'number',
-                min: 30,  // minimum value
+                min: 30,
                 max: 300,
                 required: true,
-                initialValue: initialValues?.waistCircumference
+                initialValue: initialValues.waistCircumference
             },
             {
                 name: 'hip_circumference',
                 label: 'Hip Circumference (cm)',
                 type: 'number',
-                min: 30,  // minimum value
+                min: 30,
                 max: 300,
                 required: true,
-                initialValue: initialValues?.hipCircumference
+                initialValue: initialValues.hipCircumference
             },
         ],
         submitButtonText: 'Save',
@@ -115,7 +113,7 @@ export default function Page({ params }: { params: { id: string } }) {
                     hip_circumference: Number(values.hip_circumference),
                 };
         
-                const hasInitialValues = Object.keys(initialValues).length > 0;
+                const hasInitialValues = Object.values(initialValues).some(value => value !== '');
                 
                 if (hasInitialValues) {
                     const { error } = await supabase
@@ -150,5 +148,5 @@ export default function Page({ params }: { params: { id: string } }) {
         return <p>Loading...</p>;
     }
 
-    return <DynamicForm formConfig={{ ...formConfig, initialValues }} />;
+    return <DynamicForm formConfig={formConfig} />;
 }
