@@ -1,5 +1,4 @@
 'use client'
-
 import DynamicForm from "@/components/DynamicForm";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
@@ -10,24 +9,20 @@ interface DietaryInfo {
     socialEmotional: string | number;
 }
 
-
 interface FormValues {
     dietary_habits: string;
     social_and_emotional_considerations: string;
 }
-
-
-
-
 
 export default function Page({ params }: { params: { id: string } }) {
     const [loading, setLoading] = useState(true);
     const [initialValues, setInitialValues] = useState<DietaryInfo>({
         dietaryHabits: '',
         socialEmotional: '',
-        });
+    });
     const supabase = createClient();
     const router = useRouter()
+    
     useEffect(() => {
         const getClientDietaryInfo = async () => {
             try {
@@ -64,20 +59,20 @@ export default function Page({ params }: { params: { id: string } }) {
                 label: 'Dietary Habits and Preferences',
                 type: 'text',
                 required: true,
-                initialValue: initialValues?.dietaryHabits,
+                initialValue: initialValues.dietaryHabits,
             },
             {
                 name: 'social_and_emotional_considerations',
                 label: 'Social and Emotional Considerations',
                 type: 'text',
                 required: true,
-                initialValue: initialValues?.socialEmotional,
+                initialValue: initialValues.socialEmotional,
             },
         ],
         submitButtonText: 'Save',
-        onSubmit: async (values:FormValues) => {
+        onSubmit: async (values: FormValues) => {
             try {
-                const hasInitialValues = Object.keys(initialValues).length > 0;
+                const hasInitialValues = initialValues.dietaryHabits !== '' || initialValues.socialEmotional !== '';
 
                 if (hasInitialValues) {
                     const { error } = await supabase
@@ -111,7 +106,6 @@ export default function Page({ params }: { params: { id: string } }) {
         },
         onCancel: () => {
             router.push('/dashboard')
-
         },
     };
 
@@ -119,5 +113,5 @@ export default function Page({ params }: { params: { id: string } }) {
         return <p>loading ... </p>;
     }
 
-    return <DynamicForm formConfig={{ ...formConfig, initialValues }} />;
+    return <DynamicForm formConfig={formConfig} />;
 }
