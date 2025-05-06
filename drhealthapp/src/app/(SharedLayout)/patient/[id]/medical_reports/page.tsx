@@ -60,7 +60,7 @@ function Page({ params }: { params: { id: string } }) {
     const uploadFile = async (file: File) => {
         // setUploading(true);
         const fileBath=`${params.id}/${file.name}`
-        const { } = await supabase
+        const { data, error } = await supabase
           .storage
           .from("files")
           .upload(fileBath, file);
