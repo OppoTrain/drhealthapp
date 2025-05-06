@@ -1,132 +1,134 @@
-import React from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import InputFactory from "./InputFactory";
+import React from 'react';
+import { useForm,SubmitHandler } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import InputFactory from './InputFactory';
 
 // Map field types to Zod validation rules
 const getZodSchema = (fields) => {
-  const schemaShape = fields.reduce((acc, field) => {
-    let schema;
-    if (field.required) {
-      field.minLength = 1;
-    }
-    switch (field.type) {
-      case "number":
-        schema = z.coerce.number();
-        if (field.min !== undefined) {
-          schema = schema.min(
-            field.min,
-            `${field.label} must be at least ${field.min}`
-          );
+    const schemaShape = fields.reduce((acc, field) => {
+        let schema;
+        if(field.required){
+            field.minLength=1
         }
-        if (field.max !== undefined) {
-          schema = schema.max(
-            field.max,
-            `${field.label} must be at most ${field.max}`
-          );
-        }
-        break;
+        switch (field.type) {
 
-      case 'date':
-        schema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)');
-        break;
+            case 'number':
+                schema = z.coerce.number();
+                if (field.min !== undefined) {
+                schema = schema.min(field.min, `${field.label} must be at least ${field.min}`);
+                }
+                if (field.max !== undefined) {
+                schema = schema.max(field.max, `${field.label} must be at most ${field.max}`);
+                }
+                break;
+            case 'select':
+                if (field.name === 'residential_area') {
+                    schema = z.coerce.number() // Ensure number type
+                      .refine(val => areas.some(area => area.id === val), {
+                        message: `Please select a valid ${field.label}`
+                      });
+                  } 
+                // if (field.name === 'residential_area') {
+                //     schema = z.coerce.number()  // Will convert string inputs to numbers
+                //       .refine(val => field.options.some(opt => opt.value === val), {
+                //         message: `Please select a valid ${field.label}`
+                //       });
+                    
+                //     if (field.required) {
+                //       schema = schema.min(1, { message: `${field.label} is required` });
+                //     }
+                //   }
+                //   break;
+            case 'text':
+            case 'textarea':
+                schema = z.string();
+                if (field.minLength) {
+                    schema = schema.min(field.minLength, `${field.label} must be at least ${field.minLength} characters`);
+                }
+                if (field.maxLength) {
+                    schema = schema.max(field.maxLength, `${field.label} must be at most ${field.maxLength} characters`);
+                }
+                break;
+            case 'date':
+                schema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)');
+                break;
+            case 'email':
+                schema = z.string().email(`Invalid ${field.label.toLowerCase()} format`);
+                break;
+            
+            
+            case 'password':
+                schema = z.string().min(8, `${field.label} must be at least 8 characters`)
+                break;
+            case 'tel':
+                schema = z.string()
+                    .min(10, `${field.label} must be at least 10 digits`)
+                    .max(15, `${field.label} must be at most 15 digits`)
+                    .regex(/^[0-9+() -]*$/, {
+                        message: `${field.label} must contain only numbers and phone symbols (+, -, (, ))`
+                    });
+                break;
+            case 'textGender':
+                schema = z.string()
+                .refine(value => ['Male', 'Female'].includes(value), {
+                message: 'Gender must be either "Male" or "Female"'
+                });
+                break;
 
-      case "text":
-      case "textarea":
-        schema = z.string();
-        if (field.minLength) {
-          schema = schema.min(
-            field.minLength,
-            `${field.label} must be at least ${field.minLength} characters`
-          );
+            case 'textMaritalState':
+                schema = z.string()
+                .refine(value => ['Married', 'Single' , 'Armal'].includes(value), {
+                message: 'Must be either "Married" or "Single" or "Armal"'
+                });
+                break;
+            case 'radio':
+                if (field.name === 'pregnance_status') {
+                    schema = z.enum(['true', 'false'], {
+                      errorMap: () => ({ message: `Please select pregnancy status` })
+                    });
+                }
+                break;
+            case 'checkbox':
+                schema = z.boolean();
+                break;
+            default:
+                schema = z.string();
         }
-        if (field.maxLength) {
-          schema = schema.max(
-            field.maxLength,
-            `${field.label} must be at most ${field.maxLength} characters`
-          );
-        }
-        break;
-      case "email":
-        schema = z
-          .string()
-          .email(`Invalid ${field.label.toLowerCase()} format`);
-        break;
-      case "time":
-        schema = z.string().regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, {
-          message: `${field.label} must be in HH:MM format`,
-        });
-        break;
 
-      case "password":
-        schema = z
-          .string()
-          .min(8, `${field.label} must be at least 8 characters`);
-        break;
-      case "tel":
-        schema = z.string()
-          .min(10, `${field.label} must be at least 10 digits`)
-          .max(15, `${field.label} must be at most 15 digits`)
-          .regex(/^[0-9+() -]*$/, {
-            message: `${field.label} must contain only numbers and phone symbols (+, -, (, ))`,
-          });
-        break;
-      case "select":
-        if (field.name === 'residential_area') {
-          schema = z.coerce.number() // Ensure number type
-            .refine(val => areas.some(area => area.id === val), {
-              message: `Please select a valid ${field.label}`
-            });
-        }
-      case "radio":
-        if (field.name === 'pregnance_status') {
-          schema = z.enum(['true', 'false'], {
-            errorMap: () => ({ message: `Please select pregnancy status` })
-          });
-        }
-        const values = field.options.map((option) => option.value);
-        schema = z.enum(values, {
-          errorMap: () => ({
-            message: `Please select a valid option for ${field.label}`,
-          }),
-        });
-        break;
-      case "checkbox":
-        schema = z.boolean();
-        break;
-      default:
-        schema = z.string();
-    }
+        return {
+            ...acc,
+            [field.name]: schema,
+        };
+    }, {});
 
-    return {
-      ...acc,
-      [field.name]: schema,
-    };
-  }, {});
-
-  return z.object(schemaShape);
+    return z.object(schemaShape);
 };
 
 const DynamicForm = ({ formConfig }) => {
-  const schema = getZodSchema(formConfig.fields);
+    const schema = getZodSchema(formConfig.fields);
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-    reset,
-  } = useForm({
-    resolver: zodResolver(schema),
-    defaultValues: formConfig.fields.reduce(
-      (acc, field) => ({
-        ...acc,
-        [field.name]:
-          field.initialValue ?? (field.type === "checkbox" ? false : ""),
-      }),
-      {}
-    ),
-  });
+    const {
+        control,
+        handleSubmit,
+        formState: { errors, isSubmitting },
+        reset,
+    } = useForm({
+        resolver: zodResolver(schema),
+        defaultValues: formConfig.fields.reduce((acc, field) => ({
+            ...acc,
+            
+            [field.name]: 
+                // field.type === 'select' && field.name === 'residential_area' 
+                // ? Number(field.initialValue) || undefined // Convert to number
+                // : field.initialValue ?? (field.type === 'checkbox' ? false : ''),
+
+            // field.type === 'select' 
+            // ? field.initialValue || '' // Keep as string or whatever type your options use
+             field.initialValue ?? (field.type === 'checkbox' ? false : ''),
+        }), {}),
+    });
+
 
     return (
         <div className="p-6 bg-white">

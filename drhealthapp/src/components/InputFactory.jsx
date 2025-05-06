@@ -33,6 +33,7 @@ const InputFactory = ({ config, control, errors }) => {
             //         )}
             //     />
             // );
+
             return (
                 <Controller
                   name={config.name}
@@ -58,7 +59,6 @@ const InputFactory = ({ config, control, errors }) => {
                   )}
                 />
               );
-
 
         case 'textarea':
             return (
