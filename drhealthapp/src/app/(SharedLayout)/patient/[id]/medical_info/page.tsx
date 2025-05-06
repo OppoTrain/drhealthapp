@@ -5,7 +5,6 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-
 interface MedicalInfo {
     chronicDiseases: string | number;
     recentSurgeries: string | number;
@@ -20,7 +19,6 @@ interface FormValues {
     medications: string;
 }
 
-
 export default function Page({ params }: { params: { id: string } }) {
     const [loading, setLoading] = useState(true);
     const [initialValues, setInitialValues] = useState<MedicalInfo>({
@@ -28,7 +26,7 @@ export default function Page({ params }: { params: { id: string } }) {
         recentSurgeries: '',
         allergies: '',
         medications: '',
-        });
+    });
     const supabase = createClient();
     const router = useRouter()
 
@@ -70,34 +68,34 @@ export default function Page({ params }: { params: { id: string } }) {
                 label: 'Chronic Diseases',
                 type: 'text',
                 required: true,
-                initialValue: initialValues?.chronicDiseases
+                initialValue: initialValues.chronicDiseases
             },
             {
                 name: 'recent_surgeries_hospitalizations',
                 label: 'Recent Surgeries or Hospitalizations',
                 type: 'text',
                 required: true,
-                initialValue: initialValues?.recentSurgeries
+                initialValue: initialValues.recentSurgeries
             },
             {
                 name: 'allergies_intolerances',
                 label: 'Known Allergies or Intolerances',
                 type: 'text',
                 required: true,
-                initialValue: initialValues?.allergies
+                initialValue: initialValues.allergies
             },
             {
                 name: 'medications',
                 label: 'Medications or Supplements',
                 type: 'text',
                 required: true,
-                initialValue: initialValues?.medications
+                initialValue: initialValues.medications
             },
         ],
         submitButtonText: 'Save',
         onSubmit: async (values:FormValues) => {
             try {
-                const hasInitialValues = Object.keys(initialValues).length > 0;
+                const hasInitialValues = Object.values(initialValues).some(value => value !== '');
                 if (hasInitialValues) {
                     const { error } = await supabase
                         .from('medical_informations')
@@ -142,5 +140,5 @@ export default function Page({ params }: { params: { id: string } }) {
         return <p>loading ... </p>;
     }
 
-    return <DynamicForm formConfig={{ ...formConfig, initialValues }} />;
+    return <DynamicForm formConfig={formConfig} />;
 }
