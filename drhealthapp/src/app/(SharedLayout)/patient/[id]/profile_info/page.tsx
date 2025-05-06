@@ -131,7 +131,7 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
       fetchAreas();
     }, []);
 
-    const formConfig = {
+    const getFormConfig = () => ({
         inputColumns: 2,
         fields: [
           {
@@ -249,7 +249,6 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
         ],
         submitButtonText: 'Save',
 
-
         onSubmit: async (values: Record<string, any>) => {
           try {
             // Convert radio button value to boolean properly
@@ -318,9 +317,9 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
         },
     
         onCancel: () => router.push('/dashboard')
-      };
+    });
 
     if (loading) return <div>Loading...</div>;
 
-    return <DynamicForm formConfig={{ ...formConfig, initialValues }} />;
+    return <DynamicForm formConfig={getFormConfig()} />;
 }
