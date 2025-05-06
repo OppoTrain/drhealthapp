@@ -42,35 +42,43 @@ export default function MedicalInfoPage({ params }: { params: { id: string } }) 
     fetchMedicalInfo();
   }, [params.id, supabase]);
 
-  const formConfig = useMemo(() => ({
-    inputColumns: 2,
+  // Let's try separating the form configuration from values and handlers
+  const formFields = useMemo(() => [
+    {
+      name: 'conclusion',
+      label: 'Conclusion',
+      type: 'text',
+      required: true,
+      initialValue: initialValues.conclusion,
+    }
+  ], [initialValues.conclusion]);
+
+  const handleSubmit = async (values: MedicalInfo) => {
+    try {
+      const { error } = await supabase
+        .from('patient')
+        .update({ conclusion: values.conclusion })
+        .eq('patient_id', params.id);
+      
+      if (error) throw error;
+      alert('Conclusion saved!');
+    } catch (err) {
+      console.error('Error saving conclusion:', err);
+      alert('Failed to save conclusion.');
+    }
+  };
+
+  const handleCancel = () => router.push('/dashboard');
+
+  // Simplified form configuration
+  const formConfig = {
+    fields: formFields,
+    onSubmit: handleSubmit,
+    onCancel: handleCancel,
     title: 'Conclusion',
-    fields: [
-      {
-        name: 'conclusion',
-        label: 'Conclusion',
-        type: 'text',
-        required: true,
-        initialValue: initialValues.conclusion,
-      },
-    ],
     submitButtonText: 'Save',
-    onSubmit: async (values: MedicalInfo) => {
-      try {
-        const { error } = await supabase
-          .from('patient')
-          .update({ conclusion: values.conclusion })
-          .eq('patient_id', params.id);
-        
-        if (error) throw error;
-        alert('Conclusion saved!');
-      } catch (err) {
-        console.error('Error saving conclusion:', err);
-        alert('Failed to save conclusion.');
-      }
-    },
-    onCancel: () => router.push('/dashboard'),
-  }), [initialValues.conclusion, params.id, router, supabase]);
+    columns: 2,  // Instead of inputColumns (this is a guess)
+  };
 
   if (loading) {
     return <p>Loading...</p>;
@@ -80,6 +88,5 @@ export default function MedicalInfoPage({ params }: { params: { id: string } }) 
     return <p className="text-red-500">{error}</p>;
   }
 
-  // Fixed: Removed the initialValues property since it's not part of FormConfig
   return <DynamicForm formConfig={formConfig} />;
 }
