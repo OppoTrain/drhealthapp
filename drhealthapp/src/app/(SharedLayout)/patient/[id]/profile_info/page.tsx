@@ -132,6 +132,7 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
     }, []);
 
     const getFormConfig = () => ({
+        title: 'Patient Profile',
         inputColumns: 2,
         fields: [
           {
