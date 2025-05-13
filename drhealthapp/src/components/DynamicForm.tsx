@@ -63,17 +63,23 @@ const getZodSchema = (fields: FormField[]) => {
                 }
                 break;
             case 'select':
-                if (field.name === 'residential_area') {
-                    schema = z.coerce.number() // Ensure number type
-                      .refine(val => areas.some((area: any) => area.id === val), {
-                        message: `Please select a valid ${field.label}`
-                      });
-                } else {
-                    schema = z.string();
+                // if (field.name === 'residential_area') {
+                //     schema = z.coerce.number() // Ensure number type
+                //       .refine(val => areas.some((area: any) => area.id === val), {
+                //         message: `Please select a valid ${field.label}`
+                //       });
+                // } else {
+                //     schema = z.string();
+                //     if (field.required) {
+                //         schema = schema.min(1, `${field.label} is required`);
+                //     }
+                // }
+                // break;
+
+                schema = z.string();
                     if (field.required) {
                         schema = schema.min(1, `${field.label} is required`);
                     }
-                }
                 break;
             case 'text':
             case 'textarea':

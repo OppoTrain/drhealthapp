@@ -5,6 +5,32 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import DynamicForm from "@/components/DynamicForm";
 
+type FieldType = 'text' | 'time' | 'number' | 'select' | 'textarea' | 'checkbox' | 'date' | 'email' | 'password' | 'radio' | 'tel' | 'textGender' | 'textMaritalState';
+
+interface FormField {
+    name: string;
+    label: string;
+    type: FieldType;
+    required: boolean;
+    initialValue?: string | number;
+    options?: Array<{ value: string; label: string }>; // Add this line
+    min?: number; // Add these if you're using them
+    max?: number;
+    transform?: (value: string) => any; // Add this for your radio transform
+}
+
+interface FormConfig {
+    inputColumns: number;
+    title: string;
+    fields: FormField[];
+    submitButtonText: string;
+    onSubmit: (values: any) => Promise<void> | void;
+    onCancel?: () => void;
+}
+
+
+
+
 interface PatientProfile {
   national_id?: string;
   first_visit?: string;
@@ -131,7 +157,7 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
       fetchAreas();
     }, []);
 
-    const getFormConfig = () => ({
+    const getFormConfig :FormConfig={
         title: 'Patient Profile',
         inputColumns: 2,
         fields: [
@@ -173,7 +199,9 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
               type: 'select',
               options: areas.map(area => ({ value: area.id.toString(), label: area.name })),
               required: true,
-              initialValue: initialValues.residential_area?.toString() || ''
+              initialValue: initialValues.residential_area?.toString() || '',
+              transform: (value: string) => value ? Number(value) : null
+
           },
           {
             name: 'national_id',
@@ -204,6 +232,7 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
             name: 'bedtime',
             label: 'Bedtime',
             type: 'time',
+            required: true,
             initialValue: initialValues.bedtime || ''
           },
           {
@@ -212,6 +241,7 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
             type: 'number',
             min: 0,
             max: 24,
+            required: true,
             initialValue: initialValues.sleep_hours?.toString() || '0'
           },
           {
@@ -219,19 +249,22 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
             label: 'Number of children',
             type: 'number',
             min: 0,
+            required: true,
             initialValue: initialValues.children_number?.toString() || '0'
           },
           {
-            name: 'previous_births',
+            name: 'previos_births',
             label: 'Number of previous births',
             type: 'number',
             min: 0,
+            required: false,
             initialValue: initialValues.previos_births?.toString() || '0'
           },
           {
             name: 'pregnance_status',
             label: 'Are you pregnant?',
             type: 'radio',
+            required: true,
             options: [
               { value: 'true', label: 'Yes' },
               { value: 'false', label: 'No' }
@@ -243,6 +276,7 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
             name: 'pregnancy_weeks',
             label: 'Number of weeks of pregnancy',
             type: 'number',
+            required: false,
             min: 0,
             max: 42,
             initialValue: initialValues.pregnancy_weeks?.toString() || '0',
@@ -266,6 +300,7 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
               pregnance_status: pregnanceStatus,
               pregnancy_weeks: values.pregnancy_weeks ? Number(values.pregnancy_weeks) : null,
               residential_area: values.residential_area ? Number(values.residential_area) : null,
+
             };
         
             // Update patient basic info
@@ -318,7 +353,7 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
         },
     
         onCancel: () => router.push('/dashboard')
-    });
+    };
 
     if (loading) return <div>Loading...</div>;
 
