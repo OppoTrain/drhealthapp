@@ -4,27 +4,33 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 interface RegisterClientModalProps {
-  onClose: () => void;
+  isOpen: boolean;
+  onOpenChange: () => void;
   onClientAdded: () => void;
 }
 
 export default function RegisterModal({
-  onClose,
+  isOpen,
+  onOpenChange,
   onClientAdded,
 }: RegisterClientModalProps) {
+  if (!isOpen) return null;
+
   const [formData, setFormData] = useState({
-    full_name: "",
+    first_name: "",
+    middle_name: "",
+    last_name: "",
     gender: "",
     birth_date: "",
     weight: "",
-    length: "",
+    height: "", // changed from length
     diseases: "",
     phone_number: "",
   });
-  const supabase = createClient();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const supabase = createClient();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -36,8 +42,20 @@ export default function RegisterModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.full_name || !formData.gender || !formData.birth_date) {
-      setError("Please fill out all required fields.");
+    const {
+      first_name,
+      middle_name,
+      last_name,
+      phone_number,
+      gender,
+      birth_date,
+      diseases,
+      weight,
+      height,
+    } = formData;
+
+    if (!first_name || !middle_name || !last_name || !phone_number) {
+      setError("Please fill out all required name and phone fields.");
       return;
     }
 
@@ -45,28 +63,44 @@ export default function RegisterModal({
       setIsSubmitting(true);
       setError("");
 
-      // Get session to retrieve doctor ID
       const {
         data: { session },
         error: sessionError,
       } = await supabase.auth.getSession();
-
-      if (sessionError || !session?.user) {
-        throw new Error("Session error. Please re-login.");
-      }
+      if (sessionError || !session?.user) throw new Error("Session error");
 
       const doctor_id = session.user.id;
 
-      // Insert into patient table
+      // Check for duplicates first
+      const { data: existing } = await supabase
+        .from("patient")
+        .select("patient_id")
+        .match({
+          first_name,
+          middle_name,
+          last_name,
+          phone_number,
+        })
+        .maybeSingle();
+
+      if (existing) {
+        setError(
+          "A client with this full name and phone number already exists."
+        );
+        return;
+      }
+
       const { data: patientData, error: patientError } = await supabase
         .from("patient")
         .insert([
           {
-            patient_name: formData.full_name,
-            gender: formData.gender,
-            birth_date: formData.birth_date,
-            disases: formData.diseases,
-            phone_number: formData.phone_number,
+            first_name,
+            middle_name,
+            last_name,
+            gender,
+            birth_date,
+            disases: diseases,
+            phone_number,
             doctor_id,
           },
         ])
@@ -75,26 +109,20 @@ export default function RegisterModal({
 
       if (patientError || !patientData) throw patientError;
 
-      // Insert into body_measurement table
-      const { error: bodyError } = await supabase
-        .from("body_measurement")
-        .insert([
-          {
-            patient_id: patientData.patient_id,
-            weight: formData.weight ? parseInt(formData.weight) : null,
-            height: formData.length ? parseInt(formData.length) : null,
-          },
-        ]);
-
-      if (bodyError) throw bodyError;
+      await supabase.from("body_measurement").insert([
+        {
+          patient_id: patientData.patient_id,
+          weight: weight ? parseInt(weight) : null,
+          height: height ? parseInt(height) : null,
+        },
+      ]);
 
       onClientAdded();
-      onClose();
+      onOpenChange();
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Failed to add client.";
-      console.error("Registration error:", err);
-      setError(message);
+      const msg = err instanceof Error ? err.message : "Failed to add client.";
+      setError(msg);
+      console.error("Register error:", msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -108,7 +136,7 @@ export default function RegisterModal({
             Register client
           </h2>
           <button
-            onClick={onClose}
+            onClick={onOpenChange}
             className="text-gray-400 hover:text-gray-600"
           >
             ×
@@ -120,39 +148,60 @@ export default function RegisterModal({
         )}
 
         <form onSubmit={handleSubmit} className="p-4">
-          <div className="mb-4">
-            <label className="block text-sm text-gray-700 mb-1">
-              Full name
-            </label>
-            <input
-              type="text"
-              name="full_name"
-              value={formData.full_name}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              required
-            />
+          {/* First, Middle, Last Name */}
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            <div>
+              <label className="block text-sm mb-1 text-gray-700">
+                First name
+              </label>
+              <input
+                name="first_name"
+                value={formData.first_name}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div>
+              <label className="block text-sm mb-1 text-gray-700">
+                Middle name
+              </label>
+              <input
+                name="middle_name"
+                value={formData.middle_name}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div>
+              <label className="block text-sm mb-1 text-gray-700">
+                Last name
+              </label>
+              <input
+                name="last_name"
+                value={formData.last_name}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
           </div>
 
+          {/* Gender + Birth date */}
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-sm text-gray-700 mb-1">Gender</label>
+              <label className="block text-sm mb-1 text-gray-700">Gender</label>
               <select
                 name="gender"
                 value={formData.gender}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md appearance-none"
-                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
               >
                 <option value="">Select one</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
-                <option value="Other">Other</option>
               </select>
             </div>
-
             <div>
-              <label className="block text-sm text-gray-700 mb-1">
+              <label className="block text-sm mb-1 text-gray-700">
                 Birth date
               </label>
               <input
@@ -161,15 +210,14 @@ export default function RegisterModal({
                 value={formData.birth_date}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                required
-                placeholder="mm/dd/yyyy"
               />
             </div>
           </div>
 
+          {/* Weight + Height */}
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-sm text-gray-700 mb-1">Weight</label>
+              <label className="block text-sm mb-1 text-gray-700">Weight</label>
               <input
                 type="number"
                 name="weight"
@@ -179,24 +227,24 @@ export default function RegisterModal({
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-700 mb-1">Length</label>
+              <label className="block text-sm mb-1 text-gray-700">Height</label>
               <input
                 type="number"
-                name="length"
-                value={formData.length}
+                name="height"
+                value={formData.height}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               />
             </div>
           </div>
 
+          {/* Diseases + Phone */}
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-sm text-gray-700 mb-1">
+              <label className="block text-sm mb-1 text-gray-700">
                 Diseases
               </label>
               <input
-                type="text"
                 name="diseases"
                 value={formData.diseases}
                 onChange={handleChange}
@@ -204,9 +252,8 @@ export default function RegisterModal({
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               />
             </div>
-
             <div>
-              <label className="block text-sm text-gray-700 mb-1">
+              <label className="block text-sm mb-1 text-gray-700">
                 Phone number
               </label>
               <input

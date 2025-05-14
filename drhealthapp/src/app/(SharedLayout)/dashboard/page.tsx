@@ -1,83 +1,81 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import ClientCard from "@/components/ClientCard";
-import RegisterClientModal from "@/components/RegisterModal";
+import RegisterModal from "@/components/RegisterModal";
 import { useDisclosure } from "@heroui/modal";
 
 interface Patient {
   patient_id: string;
-  patient_name: string;
+  first_name: string;
+  last_name: string;
   gender: string;
   birth_date: string;
   disases: string;
   phone_number: string;
   created_at: string;
+  body_mesurment?: {
+    weight: number | null;
+    height: number | null;
+  };
 }
 
 export default function Dashboard() {
   const supabase = createClient();
-  const router = useRouter();
-
-  const [sessionChecked, setSessionChecked] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [clients, setClients] = useState<Patient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   useEffect(() => {
-    const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session) {
-        router.replace("/login");
-        return;
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user?.id) {
+        setUserId(session.user.id);
+        fetchClients(session.user.id);
       }
-
-      setUserId(session.user.id);
-      setSessionChecked(true);
-    };
-
-    checkSession();
-  }, [router]);
-
-  useEffect(() => {
-    if (userId) {
-      fetchClients(userId);
-    }
-  }, [userId]);
+    });
+  }, []);
 
   const fetchClients = async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from("patient")
-        .select("*")
+        .select(
+          `
+  patient_id,
+  first_name,
+  last_name,
+  gender,
+  birth_date,
+  disases,
+  phone_number,
+  created_at,
+  body_measurement(weight, height)
+`
+        )
         .eq("doctor_id", userId)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setClients(data || []);
+      setClients(
+        (data || []).map((patient) => ({
+          ...patient,
+          body_measurement: Array.isArray(patient.body_measurement)
+            ? patient.body_measurement[0]
+            : patient.body_measurement,
+        }))
+      );
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Unknown error occurred.";
-      console.error("Error fetching patients:", message);
+      console.error("Error fetching patients:", err);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleClientAdded = async () => {
-    onOpenChange(); // ✅ Correct usage with no arguments
-
-    if (userId) {
-      await fetchClients(userId);
-    }
+    if (userId) await fetchClients(userId);
   };
 
   const handleSearch = () => {
@@ -86,55 +84,53 @@ export default function Dashboard() {
 
   const filteredClients = searchQuery.trim()
     ? clients.filter((client) =>
-        client.patient_name.toLowerCase().includes(searchQuery.toLowerCase())
+        `${client.first_name} ${client.last_name}`
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
       )
     : clients;
 
-  if (!sessionChecked) return null;
-
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header section - title only */}
+      {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-4">
-            <h1 className="text-2xl font-medium text-gray-800">Clients</h1>
+            <h1 className="text-[25px] font-black text-[#333434]">Clients</h1>
           </div>
         </div>
       </div>
 
-      {/* Search and Add Client controls */}
+      {/* Search and Add */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex justify-end items-center gap-2">
-          <div className="relative">
+          <div className="flex rounded-md overflow-hidden border border-gray-300">
             <input
               type="text"
               placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              className="border border-gray-300 rounded-md px-3 py-2 pr-10 w-64 focus:outline-none"
+              className="px-3 py-2 w-64 focus:outline-none"
             />
             <button
               onClick={handleSearch}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-teal-600"
+              className="bg-teal-600 px-3 text-white flex items-center justify-center"
               aria-label="Search"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
+                className="w-5 h-5"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-5 h-5"
               >
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
             </button>
           </div>
+
           <button
             onClick={onOpen}
             aria-label="add-client"
@@ -145,7 +141,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Content section */}
+      {/* Client Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
         {isLoading ? (
           <div className="flex justify-center p-12">
@@ -160,19 +156,26 @@ export default function Dashboard() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredClients.map((client) => (
-              <ClientCard key={client.patient_id} patient={client} />
+              <ClientCard
+                key={client.patient_id}
+                patient={client}
+                onClientDeleted={() =>
+                  setClients((prev) =>
+                    prev.filter((p) => p.patient_id !== client.patient_id)
+                  )
+                }
+              />
             ))}
           </div>
         )}
       </div>
 
-      {/* Modal: open only when isOpen is true */}
-      {isOpen && (
-        <RegisterClientModal
-          onClose={onOpenChange} // ✅ FIXED
-          onClientAdded={handleClientAdded}
-        />
-      )}
+      {/* Modal */}
+      <RegisterModal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        onClientAdded={handleClientAdded}
+      />
     </div>
   );
 }
