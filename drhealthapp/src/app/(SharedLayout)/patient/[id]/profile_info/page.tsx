@@ -45,7 +45,9 @@ interface PatientProfile {
 }
 
 interface PatientData {
-  patient_name?: string;
+  first_name?: string;
+  middle_name?: string;
+  last_name?: string;
   gender?: string;
   phone_number?: string;
   birth_date?: string;
@@ -83,7 +85,9 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
                 const { data, error } = await supabase
                 .from('patient')
                 .select(`
-                    patient_name,
+                    first_name,
+                    middle_name,
+                    last_name,
                     gender,
                     phone_number,
                     birth_date,
@@ -111,7 +115,9 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
                 if (data) {
                     const profileData = data.patient_profile?.[0] || {};
                     setInitialValues({
-                        patient_name: data.patient_name || '',
+                        first_name: data.first_name || '',
+                        middle_name: data.middle_name || '',
+                        last_name: data.last_name || '',
                         gender: data.gender || '',
                         phone_number: data.phone_number || '',
                         birth_date: data.birth_date || '',
@@ -162,11 +168,25 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
         inputColumns: 2,
         fields: [
           {
-            name: 'patient_name',
-            label: 'Patient name',
+            name: 'first_name',
+            label: 'First name',
             type: 'text',
             required: true,
-            initialValue: initialValues.patient_name || ''
+            initialValue: initialValues.first_name || ''
+          },
+          {
+            name: 'middle_name',
+            label: 'Middle name',
+            type: 'text',
+            required: true,
+            initialValue: initialValues.middle_name || ''
+          },
+          {
+            name: 'last_name',
+            label: 'Last name',
+            type: 'text',
+            required: true,
+            initialValue: initialValues.last_name || ''
           },
           {
             name: 'phone_number',
@@ -307,7 +327,9 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
             const { error: patientError } = await supabase
               .from('patient')
               .update({
-                patient_name: values.patient_name,
+                first_name: values.first_name,
+                middle_name : values.middle_name,
+                last_name : values.last_name,
                 phone_number: values.phone_number,
                 birth_date: values.birth_date,
                 gender: values.gender

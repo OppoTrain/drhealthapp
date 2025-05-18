@@ -16,7 +16,7 @@ interface Patient {
   patient_id: string;
   created_at: string;
   doctor_id: string;
-  patient_name: string;
+  first_name: string;
   disease: string; 
   gender: string;
   phone_number: string;
@@ -90,7 +90,7 @@ export default function ClientRootLayout({ children, params }: ClientRootLayoutP
   return (
     <>
       <Header
-        userName={patient.patient_name}
+        userName={patient.first_name}
         birthDate={patient.birth_date}
         age={calculateAge(patient.birth_date)}
         dietPlan={dietPlanName}
