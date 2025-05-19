@@ -1,8 +1,9 @@
-import React from 'react';
+import React ,{ useState } from 'react';
 import { useForm, FieldErrors } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import InputFactory from './InputFactory';
+import { FiEdit ,FiSave} from 'react-icons/fi'; // Import the edit icon
 
 // Define interfaces for form configuration
 interface FieldOption {
@@ -147,8 +148,28 @@ const getZodSchema = (fields: FormField[]) => {
 
 const DynamicForm: React.FC<{ formConfig: FormConfig }> = ({ formConfig }) => {
     // Move the validation after hooks to avoid conditional hook calls
+    const [isEditing, setIsEditing] = useState(false);//////////////////////////////////////////////
     const fields = formConfig?.fields || [];
     const schema = getZodSchema(fields);
+
+    // const {
+    //     control,
+    //     handleSubmit,
+    //     formState: { errors, isSubmitting },
+    //     reset,
+    // } = useForm<FormData>({
+    //     resolver: zodResolver(schema),
+    //     defaultValues: fields.reduce((acc, field) => ({
+    //         ...acc,
+    //         [field.name]: field.initialValue ?? (field.type === 'checkbox' ? false : ''),
+    //     }), {} as Record<string, any>),
+    // });
+
+    // // After hooks are called, we can do conditional rendering
+    // if (!formConfig) {
+    //     console.error("DynamicForm: formConfig is undefined");
+    //     return <div className="p-6 bg-white">Form configuration is missing</div>;
+    // }
 
     const {
         control,
@@ -163,22 +184,57 @@ const DynamicForm: React.FC<{ formConfig: FormConfig }> = ({ formConfig }) => {
         }), {} as Record<string, any>),
     });
 
-    // After hooks are called, we can do conditional rendering
     if (!formConfig) {
         console.error("DynamicForm: formConfig is undefined");
         return <div className="p-6 bg-white">Form configuration is missing</div>;
     }
 
+    const handleEdit = () => {
+        setIsEditing(true);
+    };
 
-    return (
-        <div className="p-6 bg-white">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">{formConfig.title}</h2>
+    const handleCancel = () => {
+        setIsEditing(false);
+        reset();
+        formConfig.onCancel?.();
+    };
+
+
+     return (
+        <div className="p-6 bg-white relative"> {/* Added relative positioning */}
+            <div className="flex justify-between items-start mb-6"> {/* Header container */}
+                <h2 className="text-2xl font-bold text-gray-800">{formConfig.title}</h2>
+                {!isEditing && (
+                    <button
+                            type="button"
+                            onClick={handleEdit}
+                            className="
+                                px-3 py-1.5                   
+                                sm:px-4 sm:py-2                  
+                                md:px-5 md:py-2.5                
+                                border border-[#09868A]           
+                                text-[#09868A]                    
+                                hover:bg-[#09868A]/10            
+                                active:bg-[#09868A]/20           
+                                rounded-md                       
+                                text-sm sm:text-base              
+                                flex items-center gap-1.5 sm:gap-2 
+                                transition-all duration-200       
+                                font-medium                                   
+                                "
+                    >
+                        <FiEdit className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-4.5 md:h-4.5" /> {/* Responsive icon */}
+                        <span>Edit</span>
+                    </button>
+                )}
+            </div>
+
             <form onSubmit={handleSubmit(formConfig.onSubmit)} className="space-y-6">
                 <div className={`grid grid-cols-1 md:grid-cols-${formConfig.inputColumns} gap-6`}>
                     {fields.map((field) => (
                         <div key={field.name} className="space-y-2" style={{
-                            gridColumnStart: 'auto', // Let grid auto-place columns
-                            gridColumnEnd: `span ${field.columnTakes || 1}`, // Span columns based on columnTakes
+                            gridColumnStart: 'auto',
+                            gridColumnEnd: `span ${field.columnTakes || 1}`,
                         }}>
                             <label
                                 htmlFor={field.name}
@@ -188,7 +244,10 @@ const DynamicForm: React.FC<{ formConfig: FormConfig }> = ({ formConfig }) => {
                                 {field.required && <span className="text-red-500 ml-1">*</span>}
                             </label>
                             <InputFactory
-                                config={field}
+                                config={{
+                                    ...field,
+                                    disabled: !isEditing
+                                }}
                                 control={control}
                                 errors={errors as FieldErrors<FormData>}
                             />
@@ -200,28 +259,29 @@ const DynamicForm: React.FC<{ formConfig: FormConfig }> = ({ formConfig }) => {
                         </div>
                     ))}
                 </div>
-                <div className="mt-8 flex justify-end space-x-4">
-                    {   
-                        formConfig.onCancel &&
+
+                {isEditing && (
+                    <div className="mt-8 flex justify-end space-x-4">
                         <button
                             type="button"
-                            onClick={() => {
-                                formConfig.onCancel?.();
-                                reset();
-                            }}
-                            className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                            onClick={handleCancel}
+                            className="px-6 py-2 border border-[#09868A]           
+                                text-[#09868A]                    
+                                hover:bg-[#09868A]/10            
+                                active:bg-[#09868A]/20    rounded-md hover:bg-gray-50"
                         >
                             Cancel
                         </button>
-                    }
-                    <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-300"
-                    >
-                        {isSubmitting ? 'Submitting...' : formConfig.submitButtonText || 'Submit'}
-                    </button>
-                </div>
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="px-6 py-2 bg-[#09868A] text-white rounded-md hover:bg-[#09868A]/90 flex items-center gap-2"
+                        >
+                            <FiSave className="w-4 h-4" />
+                            {isSubmitting ? 'Submitting...' : formConfig.submitButtonText || 'Submit'}
+                        </button>
+                    </div>
+                )}
             </form>
         </div>
     );

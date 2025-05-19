@@ -70,8 +70,8 @@ export default function Page({ params }: { params: { id: string } }) {
     }, [params.id]);
 
     const formConfig: FormConfig = {
-        inputColumns: 2,
         title: 'Dietary Habits',
+        inputColumns: 2,
         fields: [
             {
                 name: 'dietary_habits',
@@ -124,7 +124,7 @@ export default function Page({ params }: { params: { id: string } }) {
             }
         },
         onCancel: () => {
-            router.push('/dashboard')
+            
         },
     };
 

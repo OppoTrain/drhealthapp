@@ -151,10 +151,7 @@ export default function Page({ params }: { params: { id: string } }) {
                 console.error('Error saving medical info:', err);
                 alert('Failed to save medical information.');
             }
-        },
-        onCancel: () => {
-            router.push('/dashboard')
-        },
+        }
     };
 
     if (loading) {

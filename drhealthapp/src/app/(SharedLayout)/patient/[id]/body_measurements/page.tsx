@@ -141,10 +141,7 @@ export default function Page({ params }: { params: { id: string } }) {
                 console.error('Error saving body measurements:', err instanceof Error ? err.message : 'Unknown error');
                 alert('Failed to save body measurements.');
             }
-        },
-        onCancel: () => {
-            router.push('/dashboard')
-        },
+        }
     };
 
     if (loading) {
