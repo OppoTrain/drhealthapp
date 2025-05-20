@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import InputFactory from './InputFactory';
 import { FiEdit ,FiSave} from 'react-icons/fi'; // Import the edit icon
+import { useRouter } from 'next/router';
 
 // Define interfaces for form configuration
 interface FieldOption {
@@ -64,19 +65,6 @@ const getZodSchema = (fields: FormField[]) => {
                 }
                 break;
             case 'select':
-                // if (field.name === 'residential_area') {
-                //     schema = z.coerce.number() // Ensure number type
-                //       .refine(val => areas.some((area: any) => area.id === val), {
-                //         message: `Please select a valid ${field.label}`
-                //       });
-                // } else {
-                //     schema = z.string();
-                //     if (field.required) {
-                //         schema = schema.min(1, `${field.label} is required`);
-                //     }
-                // }
-                // break;
-
                 schema = z.string();
                     if (field.required) {
                         schema = schema.min(1, `${field.label} is required`);
@@ -148,28 +136,9 @@ const getZodSchema = (fields: FormField[]) => {
 
 const DynamicForm: React.FC<{ formConfig: FormConfig }> = ({ formConfig }) => {
     // Move the validation after hooks to avoid conditional hook calls
-    const [isEditing, setIsEditing] = useState(false);//////////////////////////////////////////////
+    const [isEditing, setIsEditing] = useState(false);
     const fields = formConfig?.fields || [];
     const schema = getZodSchema(fields);
-
-    // const {
-    //     control,
-    //     handleSubmit,
-    //     formState: { errors, isSubmitting },
-    //     reset,
-    // } = useForm<FormData>({
-    //     resolver: zodResolver(schema),
-    //     defaultValues: fields.reduce((acc, field) => ({
-    //         ...acc,
-    //         [field.name]: field.initialValue ?? (field.type === 'checkbox' ? false : ''),
-    //     }), {} as Record<string, any>),
-    // });
-
-    // // After hooks are called, we can do conditional rendering
-    // if (!formConfig) {
-    //     console.error("DynamicForm: formConfig is undefined");
-    //     return <div className="p-6 bg-white">Form configuration is missing</div>;
-    // }
 
     const {
         control,
@@ -182,12 +151,28 @@ const DynamicForm: React.FC<{ formConfig: FormConfig }> = ({ formConfig }) => {
             ...acc,
             [field.name]: field.initialValue ?? (field.type === 'checkbox' ? false : ''),
         }), {} as Record<string, any>),
+        
     });
 
     if (!formConfig) {
         console.error("DynamicForm: formConfig is undefined");
         return <div className="p-6 bg-white">Form configuration is missing</div>;
     }
+
+
+    const SubmitFormAndReload = async (data: FormData) => {
+    try {
+        // Show loading state (isSubmitting will be true automatically)
+        await formConfig.onSubmit(data); // Call your original submit function
+        
+        // After successful submission:
+        setIsEditing(false); // Exit edit mode
+        //window.location.reload(); // Reload the page
+        
+    } catch (error) {
+        console.error("Submission error:", error);
+    } 
+};
 
     const handleEdit = () => {
         setIsEditing(true);
@@ -229,7 +214,7 @@ const DynamicForm: React.FC<{ formConfig: FormConfig }> = ({ formConfig }) => {
                 )}
             </div>
 
-            <form onSubmit={handleSubmit(formConfig.onSubmit)} className="space-y-6">
+            <form onSubmit={handleSubmit(SubmitFormAndReload)} className="space-y-6">
                 <div className={`grid grid-cols-1 md:grid-cols-${formConfig.inputColumns} gap-6`}>
                     {fields.map((field) => (
                         <div key={field.name} className="space-y-2" style={{

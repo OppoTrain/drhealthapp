@@ -2,7 +2,6 @@
 
 import DynamicForm from "@/components/DynamicForm";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface BodyMeasurements {
@@ -31,7 +30,6 @@ export default function Page({ params }: { params: { id: string } }) {
         hipCircumference: '',
     });
     const supabase = createClient();
-    const router = useRouter();
 
     useEffect(() => {
         const getClientBodyMeasurements = async () => {

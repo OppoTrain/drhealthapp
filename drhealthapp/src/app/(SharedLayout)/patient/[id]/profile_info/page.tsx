@@ -1,7 +1,6 @@
 'use client'
 
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import DynamicForm from "@/components/DynamicForm";
 
@@ -77,7 +76,6 @@ export default function PatientProfileForm({ params }: { params: { id: string } 
     const [initialValues, setInitialValues] = useState<InitialValues>({});
     const [areas, setAreas] = useState<Area[]>([]); 
     const supabase = createClient();
-    const router = useRouter();
 
     useEffect(() => {
         const fetchData = async () => {

@@ -3,7 +3,6 @@
 import DynamicForm from "@/components/DynamicForm";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 // Import or define the FormConfig type to match DynamicForm's requirements
 interface FormField {
@@ -20,7 +19,7 @@ interface FormConfig {
     fields: FormField[];
     submitButtonText: string;
     onSubmit: (values: any) => Promise<void>;
-    onCancel: () => void;
+    
 }
 
 interface DietaryInfo {
@@ -40,7 +39,6 @@ export default function Page({ params }: { params: { id: string } }) {
         socialEmotional: '',
     });
     const supabase = createClient();
-    const router = useRouter()
     
     useEffect(() => {
         const getClientDietaryInfo = async () => {
@@ -123,9 +121,7 @@ export default function Page({ params }: { params: { id: string } }) {
                 alert('Failed to save dietary information.');
             }
         },
-        onCancel: () => {
-            
-        },
+       
     };
 
     if (loading) {
