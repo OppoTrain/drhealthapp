@@ -1,7 +1,6 @@
 'use client';
 import DynamicForm from '@/components/DynamicForm';
 import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState, useMemo } from 'react';
 
 // Import the proper types - you'll need to create these imports based on where your types are defined
@@ -13,7 +12,6 @@ interface MedicalInfo {
 }
 
 export default function MedicalInfoPage({ params }: { params: { id: string } }) {
-  const router = useRouter();
   const supabase = createClient();
   const [initialValues, setInitialValues] = useState<MedicalInfo>({ conclusion: '' });
   const [loading, setLoading] = useState(true);
@@ -72,14 +70,12 @@ export default function MedicalInfoPage({ params }: { params: { id: string } }) 
     }
   };
 
-  const handleCancel = () => router.push('/dashboard');
 
   // Explicitly cast to any to bypass type checking temporarily if needed
   // Remove this cast once you've correctly imported and used the proper types
   const formConfig = {
     fields: formFields,
     onSubmit: handleSubmit,
-    onCancel: handleCancel,
     title: 'Conclusion',
     submitButtonText: 'Save',
     inputColumns: 2,

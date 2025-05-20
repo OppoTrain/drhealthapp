@@ -9,42 +9,24 @@ const InputFactory = ({ config, control, errors }) => {
         className: 'w-full',
         errorMessage: errors[config.name]?.message,
         isInvalid: !!errors[config.name],
+        disabled: config.disabled, // Add disabled prop to common props
     };
 
     switch (config.type) {
         case 'select':
-            // return (
-            //     <Controller
-            //         name={config.name}
-            //         control={control}
-            //         render={({ field: { onChange, value } }) => (
-            //             <Select
-            //                 {...commonProps}
-            //                 value={value}
-            //                 onChange={onChange}
-            //                 placeholder={`Select ${config.label.toLowerCase()}`}
-            //             >
-            //                 {config.options?.map((option) => (
-            //                     <SelectItem key={option.value} value={option.value}>
-            //                         {option.label}
-            //                     </SelectItem>
-            //                 ))}
-            //             </Select>
-            //         )}
-            //     />
-            // );
-
             return (
                 <Controller
                   name={config.name}
                   control={control}
                   render={({ field }) => (
-                    <div className="h-full"> {/* Parent container with full height */}
+                    <div className="h-full">
                       <select
                         {...field}
-                        className="p-2 block w-full h-[56%] rounded-xl border border-[#E0E0E0] bg-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        className={`p-2 block w-full h-[56%] rounded-xl border border-[#E0E0E0] bg-white shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
+                          config.disabled ? 'bg-gray-100 cursor-not-allowed' : ''
+                        }`}
+                        disabled={config.disabled}
                       >
-                        {/* Show empty option if no value is selected */}
                         {!field.value && <option value="">Select an option</option>}
                         {config.options.map((option) => (
                           <option 
@@ -71,6 +53,7 @@ const InputFactory = ({ config, control, errors }) => {
                             {...field}
                             rows={4}
                             placeholder={`Enter ${config.label.toLowerCase()}`}
+                            isDisabled={config.disabled}
                         />
                     )}
                 />
@@ -88,6 +71,7 @@ const InputFactory = ({ config, control, errors }) => {
                             onChange={onChange}
                             orientation="horizontal"
                             className="flex flex-wrap gap-4"
+                            isDisabled={config.disabled}
                         >
                             {config.options?.map((option) => (
                                 <Radio key={option.value} value={option.value}>
@@ -108,6 +92,7 @@ const InputFactory = ({ config, control, errors }) => {
                         <Checkbox
                             isSelected={value}
                             onChange={(e) => onChange(e.target.checked)}
+                            isDisabled={config.disabled}
                         >
                             {config.label}
                         </Checkbox>
@@ -126,6 +111,7 @@ const InputFactory = ({ config, control, errors }) => {
                             {...field}
                             type={config.type}
                             placeholder={`Enter ${config.label.toLowerCase()}`}
+                            isDisabled={config.disabled}
                         />
                     )}
                 />

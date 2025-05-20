@@ -2,7 +2,6 @@
 
 import DynamicForm from "@/components/DynamicForm";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface BodyMeasurements {
@@ -31,7 +30,6 @@ export default function Page({ params }: { params: { id: string } }) {
         hipCircumference: '',
     });
     const supabase = createClient();
-    const router = useRouter();
 
     useEffect(() => {
         const getClientBodyMeasurements = async () => {
@@ -141,10 +139,7 @@ export default function Page({ params }: { params: { id: string } }) {
                 console.error('Error saving body measurements:', err instanceof Error ? err.message : 'Unknown error');
                 alert('Failed to save body measurements.');
             }
-        },
-        onCancel: () => {
-            router.push('/dashboard')
-        },
+        }
     };
 
     if (loading) {

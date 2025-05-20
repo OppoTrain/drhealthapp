@@ -2,7 +2,6 @@
 
 import DynamicForm from "@/components/DynamicForm";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 // Define our own types that match what DynamicForm expects
@@ -49,7 +48,6 @@ export default function Page({ params }: { params: { id: string } }) {
         medications: '',
     });
     const supabase = createClient();
-    const router = useRouter()
 
     useEffect(() => {
         const getClientMedicalInfo = async () => {
@@ -151,10 +149,7 @@ export default function Page({ params }: { params: { id: string } }) {
                 console.error('Error saving medical info:', err);
                 alert('Failed to save medical information.');
             }
-        },
-        onCancel: () => {
-            router.push('/dashboard')
-        },
+        }
     };
 
     if (loading) {
