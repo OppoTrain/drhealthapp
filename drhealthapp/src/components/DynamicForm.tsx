@@ -217,7 +217,7 @@ const DynamicForm: React.FC<{ formConfig: FormConfig }> = ({ formConfig }) => {
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-300"
+                        className="px-6 py-2 bg-teal-500 text-white rounded-md hover:bg-teal-600 disabled:bg-teal-300"
                     >
                         {isSubmitting ? 'Submitting...' : formConfig.submitButtonText || 'Submit'}
                     </button>

@@ -1,7 +1,6 @@
 "use client";
 import { Button } from "@heroui/button";
 import { Avatar } from "@heroui/avatar";
-import { useParams, useRouter } from 'next/navigation';
 
 interface HeaderProps {
     userName: string;
@@ -11,14 +10,6 @@ interface HeaderProps {
 }
 
 export default function Header({ userName, birthDate, age, dietPlan }: HeaderProps) {
-    const params = useParams();
-    const router = useRouter();
-    const patientId = params.id as string;
-
-    const handleViewDietPlan = () => {
-        router.push(`/Diet/${patientId}/RegesterDietPlan`);
-    };
-
     return (
         <header className="w-full">
             {/* Profile Background Banner */}
@@ -40,7 +31,6 @@ export default function Header({ userName, birthDate, age, dietPlan }: HeaderPro
                 <div className="flex items-center">
                     <Button
                         className="flex items-center justify-center gap-2 rounded-2xl bg-buttonProfile text-sm text-white sm:h-12 sm:w-[300px] sm:text-base"
-                        onClick={handleViewDietPlan}
                     >
                         <img
                             src="/Icons/list_alt.png"
@@ -50,6 +40,9 @@ export default function Header({ userName, birthDate, age, dietPlan }: HeaderPro
                         <span>View diet plan</span>
                     </Button>
                 </div>
+            </div>
+            <div className="w-[90%] m-[auto] bg-white shadow-[0_2px_10px_rgba(0,0,0,0.1)] rounded-md p-4 my-16 ">
+                <h1><span className="border-b-2 border-teal-500 pb-2">Create your weeky diet plan</span></h1> 
             </div>
         </header>
     );
