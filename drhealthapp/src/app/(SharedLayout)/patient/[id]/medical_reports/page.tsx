@@ -31,8 +31,10 @@ function Page({ params }: { params: { id: string } }) {
           .eq("id", id);
         if (error) {
           console.error("Error deleting file:", error.message);
+          alert("Failed to delete file. Please try again.");
         } else {
           console.log("File deleted successfully");
+          alert("File deleted successfully!");
         }
       }
       deleteFile();
@@ -58,28 +60,30 @@ function Page({ params }: { params: { id: string } }) {
     }, [params.id]); 
 
     const uploadFile = async (file: File) => {
-        // setUploading(true);
         const fileBath=`${params.id}/${file.name}`
-        // Directly call the upload without destructuring to avoid unused variables
         await supabase
           .storage
           .from("files")
           .upload(fileBath, file);
 
-          const {data:schema,error:filesError} = await supabase
+        const {data:schema, error:filesError} = await supabase
           .from('Files')
           .insert([{
             user_id : params.id.toString(),
             file_name : file.name,
             file_size : file.size
           }])
+          .select()
+          .single();
+
         if (filesError) {
           console.error("Upload error:", filesError.message);
-        } else {
+        } else if (schema) {
           console.log("Upload successful:", schema);
-          console.log(file.size)
+          console.log(file.size);
+          // Update the state with the new file
+          setSchemaData(prev => [...prev, schema]);
         }
-        // setUploading(false);
       };
 
     function dropHandler(ev: React.DragEvent<HTMLDivElement>) {
@@ -151,16 +155,21 @@ function Page({ params }: { params: { id: string } }) {
       
             console.log(`Uploaded ${file.name}:`, uploadData);
       
-            const { error: insertError } = await supabase
+            const { data: insertedFile, error: insertError } = await supabase
               .from("Files")
               .insert({
                 file_name: file.name,
                 file_size: file.size,
                 user_id: params.id,
-              });
+              })
+              .select()
+              .single();
       
             if (insertError) {
               console.error(`Error inserting ${file.name} metadata:`, insertError.message);
+            } else if (insertedFile) {
+              // Update the state with the new file
+              setSchemaData(prev => [...prev, insertedFile]);
             }
           } catch (error) {
             console.error(`Unexpected error processing ${file.name}:`, error);

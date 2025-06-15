@@ -1,8 +1,6 @@
 "use client";
 import { Button } from "@heroui/button";
 import { Avatar } from "@heroui/avatar";
-import Link from "next/link";
-import { useParams } from "next/navigation";
 
 interface HeaderProps {
     userName: string;
@@ -12,15 +10,10 @@ interface HeaderProps {
 }
 
 export default function Header({ userName, birthDate, age, dietPlan }: HeaderProps) {
-    const params = useParams();
-    const dietPlanId = params?.id as string | undefined; // Extract ID from URL
-
     return (
         <header className="w-full">
-            {/* Profile Background Banner */}
             <div className="bg-profile-background h-[10vh] w-full bg-[#CCE0E1]" />
 
-            {/* Profile Info Section */}
             <div className="flex justify-between px-4 py-2">
                 <div className="flex items-center gap-4">
                     <Avatar size="lg" />
@@ -34,19 +27,20 @@ export default function Header({ userName, birthDate, age, dietPlan }: HeaderPro
                 </div>
 
                 <div className="flex items-center">
-                    <Link href={`/Diet/${dietPlanId}/viewDietPlan`}>
-                        <Button
-                            className="flex items-center justify-center gap-2 rounded-2xl bg-buttonProfile text-sm text-white sm:h-12 sm:w-[300px] sm:text-base"
-                        >
-                            <img
-                                src="/Icons/list_alt.png"
-                                alt="Diet Plan Icon"
-                                className="h-4 w-4 sm:h-5 sm:w-5"
-                            />
-                            <span>View diet plan</span>
-                        </Button>
-                    </Link>
+                    <Button
+                        className="flex items-center justify-center gap-2 rounded-2xl bg-buttonProfile text-sm text-white sm:h-12 sm:w-[300px] sm:text-base"
+                    >
+                        <img
+                            src="/Icons/list_alt.png"
+                            alt="Diet Plan Icon"
+                            className="h-4 w-4 sm:h-5 sm:w-5"
+                        />
+                        <span>View diet plan</span>
+                    </Button>
                 </div>
+            </div>
+            <div className="w-[90%] m-[auto] bg-white shadow-[0_2px_10px_rgba(0,0,0,0.1)] rounded-md p-4 my-16 ">
+                <h1><span className="border-b-2 border-teal-500 pb-2">Create your weeky diet plan</span></h1> 
             </div>
         </header>
     );
